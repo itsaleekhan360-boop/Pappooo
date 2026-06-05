@@ -1,9 +1,12 @@
 import tkinter as tk
-from tkinter import ttk, messagebox, scrolledtext
+from tkinter import messagebox
 import re
 import math
 
-# ── Analysis engine ───────────────────────────────────────────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
+#  ANALYSIS ENGINE
+# ══════════════════════════════════════════════════════════════════════════════
+
 SPAM_KEYWORDS = {
     "Financial Scam": [
         "free money", "you won", "prize", "lottery", "claim now",
@@ -39,14 +42,14 @@ SPAM_KEYWORDS = {
 REGEX_PATTERNS = [
     (r"\b[A-Z]{4,}\b",                     "ALL-CAPS words"),
     (r"!{2,}",                              "Multiple exclamation marks"),
-    (r"\$\d+",                              "Dollar amount"),
-    (r"https?://\S+",                       "URL detected"),
+    (r"\$\d+",                              "Dollar amount mentioned"),
+    (r"https?://\S+",                       "URL link detected"),
     (r"\b\d{10,}\b",                        "Long numeric string"),
     (r"(?i)\bfree\b",                       "Keyword: FREE"),
     (r"(?i)\bgift\b",                       "Keyword: GIFT"),
     (r"(?i)\boffer\b",                      "Keyword: OFFER"),
     (r"(?i)dear\s+(sir|madam|friend|user)", "Generic salutation"),
-    (r"(?i)\bunsubscribe\b",                "Unsubscribe link"),
+    (r"(?i)\bunsubscribe\b",                "Unsubscribe link present"),
 ]
 
 
@@ -76,531 +79,485 @@ def analyze_email(text: str) -> dict:
         if found:
             kw_hits[cat] = found
             total_kw += len(found)
-    re_hits = [(lbl, len(re.findall(pat, text)))
-               for pat, lbl in REGEX_PATTERNS if re.search(pat, text)]
+    re_hits = [(lbl, n) for lbl, n in
+               ((lbl, len(re.findall(pat, text))) for pat, lbl in REGEX_PATTERNS)
+               if n > 0]
     state    = dfa.run(total_kw)
     accepted = (state == "q3")
     score    = min(int(((total_kw + len(re_hits) * 0.5) / 20) * 100), 100)
     if accepted and score < 70:
         score = 70
-    verdict = "SPAM" if (score >= 60 or accepted) else "SUSPICIOUS" if score >= 30 else "SAFE"
-    return {"verdict": verdict, "score": score, "state": state,
-            "accepted": accepted, "kw_hits": kw_hits,
-            "total_kw": total_kw, "re_hits": re_hits}
+    verdict = ("SPAM" if (score >= 60 or accepted)
+               else "SUSPICIOUS" if score >= 30 else "SAFE")
+    return {
+        "verdict": verdict, "score": score, "state": state,
+        "accepted": accepted, "kw_hits": kw_hits,
+        "total_kw": total_kw, "re_hits": re_hits,
+    }
 
 
-# ── Design tokens ─────────────────────────────────────────────────────────────
-BG       = "#070B14"   # deep space background
-PANEL    = "#0C1220"   # panel bg
-CARD     = "#0F1729"   # card bg
-BORDER   = "#1A2D4A"   # card border
-LINE     = "#162338"   # divider
-BLUE     = "#3B82F6"   # primary blue
-BLUE_DIM = "#1D4ED8"   # darker blue
-CYAN     = "#22D3EE"   # cyan accent
-TEXT     = "#E2E8F0"   # primary text
-SUB      = "#94A3B8"   # secondary text
-MUTED    = "#3E5070"   # muted elements
-GREEN    = "#10B981"   # safe
-AMBER    = "#F59E0B"   # suspicious
-RED      = "#EF4444"   # spam
+# ══════════════════════════════════════════════════════════════════════════════
+#  DESIGN TOKENS
+# ══════════════════════════════════════════════════════════════════════════════
 
-# Verdict config: (fg, track_color, glow)
-VERDICT_CFG = {
-    "SPAM":       (RED,   "#2D0A0A", "#7F1D1D"),
-    "SUSPICIOUS": (AMBER, "#2D1F0A", "#78350F"),
-    "SAFE":       (GREEN, "#052512", "#064E3B"),
+BG      = "#0C0C0E"
+SURF    = "#131316"
+RAISED  = "#1C1C20"
+BORDER  = "#28282E"
+BORDER2 = "#343438"
+BLUE    = "#0A84FF"
+BLUE_D  = "#005FD1"
+TEXT    = "#EFEFEF"
+SUB     = "#8A8A8F"
+MUTED   = "#3A3A40"
+
+# Verdict palette — (foreground, dim-background, border)
+V = {
+    "SPAM":       ("#FF453A", "#1E0C0B", "#3D1412"),
+    "SUSPICIOUS": ("#FF9F0A", "#1E160A", "#3D2C0C"),
+    "SAFE":       ("#30D158", "#091A0F", "#0D3318"),
 }
 
-# DFA node colors: (ring_idle, ring_active, fill_active)
-DFA_NODE = {
-    "q0": ("#334155", "#818CF8"),
-    "q1": ("#334155", "#84CC16"),
-    "q2": ("#334155", "#F97316"),
-    "q3": ("#334155", "#EF4444"),
+# DFA node ring colors
+DFA_RING = {
+    "q0": "#5E5CE6",  # indigo
+    "q1": "#64D2FF",  # sky
+    "q2": "#FF9F0A",  # amber
+    "q3": "#FF453A",  # red
 }
 
-F_TITLE = ("Segoe UI", 12, "bold")
-F_HEAD  = ("Segoe UI", 10, "bold")
-F_BODY  = ("Segoe UI",  9)
-F_SMALL = ("Segoe UI",  8)
-F_MONO  = ("Consolas",  9)
-F_HUGE  = ("Segoe UI", 38, "bold")
-F_BADGE = ("Segoe UI", 11, "bold")
+F10  = ("Segoe UI", 10)
+F9   = ("Segoe UI",  9)
+F8   = ("Segoe UI",  8)
+MONO = ("Consolas",  9)
+BOLD = ("Segoe UI", 10, "bold")
+H1   = ("Segoe UI", 11, "bold")
 
 
-# ── Arc gauge (replaces progress bar) ────────────────────────────────────────
-class ArcGauge(tk.Canvas):
-    """Animated donut gauge showing spam score 0–100 %."""
+# ══════════════════════════════════════════════════════════════════════════════
+#  DFA STATE BAR  — bottom strip with animated node traversal
+# ══════════════════════════════════════════════════════════════════════════════
 
-    RING_W = 18
-    RADIUS = 58
+class DFABar(tk.Canvas):
+    """Horizontal animated DFA strip rendered at the bottom of the window."""
+
+    NODES = ["q0", "q1", "q2", "q3"]
+    NR    = 13          # node radius
+    GAP   = 90          # gap between node centres
+    W     = 4 * NR * 2 + 3 * GAP + 60
+    H     = 52
 
     def __init__(self, parent, **kw):
-        size = (self.RADIUS + 4) * 2 + self.RING_W
-        super().__init__(parent, width=size, height=size,
-                         bg=CARD, highlightthickness=0, **kw)
-        self.cx = self.cy = size // 2
-        self._score = 0
-        self._color = MUTED
-        self._label = ""
-        self._draw(0)
-
-    def _draw(self, score):
-        self.delete("all")
-        cx, cy = self.cx, self.cy
-        r = self.RADIUS
-        rw = self.RING_W
-
-        # Track ring (full circle)
-        self.create_arc(cx-r, cy-r, cx+r, cy+r,
-                        start=0, extent=359.9,
-                        style="arc", outline=LINE, width=rw)
-
-        # Score arc (clockwise from top = 90°)
-        if score > 0:
-            extent = -(score / 100) * 359.9
-            self.create_arc(cx-r, cy-r, cx+r, cy+r,
-                            start=90, extent=extent,
-                            style="arc", outline=self._color, width=rw)
-
-        # Center: percentage
-        disp = f"{score}%" if score > 0 else "—"
-        self.create_text(cx, cy - 8,
-                         text=disp,
-                         font=("Segoe UI", 20, "bold"),
-                         fill=self._color if score > 0 else MUTED)
-
-        # Center: verdict label
-        if self._label:
-            self.create_text(cx, cy + 14,
-                             text=self._label,
-                             font=("Segoe UI", 8, "bold"),
-                             fill=self._color)
-
-    def animate_to(self, target, color, label, _step=0, _frames=40):
-        self._color = color
-        self._label = label
-        t = _step / _frames
-        eased = 1 - (1 - t) ** 3         # ease-out cubic
-        current = int(target * eased)
-        self._draw(current)
-        if _step < _frames:
-            self.after(16, lambda: self.animate_to(
-                target, color, label, _step + 1, _frames))
-
-    def reset(self):
-        self._color = MUTED
-        self._label = ""
-        self._draw(0)
-
-
-# ── Animated globe ────────────────────────────────────────────────────────────
-class Globe(tk.Canvas):
-    def __init__(self, parent, size=154, **kw):
-        super().__init__(parent, width=size, height=size,
-                         bg=CARD, highlightthickness=0, **kw)
-        self.size = size
-        self.cx = self.cy = size // 2
-        self.r  = size // 2 - 12
-        self.angle = 0
+        super().__init__(parent, width=self.W, height=self.H,
+                         bg=SURF, highlightthickness=0, **kw)
+        self._lit: set[str] = set()
         self._draw()
 
-    def _proj(self, lat, lon):
-        la = math.radians(lat)
-        lo = math.radians(lon + self.angle)
-        x  = math.cos(la) * math.sin(lo)
-        y  = math.sin(la)
-        z  = math.cos(la) * math.cos(lo)
-        if z < 0:
-            return None
-        return self.cx + x * self.r, self.cy - y * self.r
+    # ── x-centre of node i ───────────────────────────────────────────────────
+    def _nx(self, i: int) -> int:
+        total = self.W
+        span  = (len(self.NODES) - 1) * self.GAP
+        start = (total - span) // 2
+        return start + i * self.GAP
 
     def _draw(self):
         self.delete("all")
-        r = self.r
-        # Ambient glow ring
-        self.create_oval(self.cx-r-6, self.cy-r-6, self.cx+r+6, self.cy+r+6,
-                         outline="#0B2040", width=1)
-        # Sphere base
-        self.create_oval(self.cx-r, self.cy-r, self.cx+r, self.cy+r,
-                         fill="#050D1C", outline=BLUE_DIM, width=1)
-        # Grid lines
-        for lat in range(-75, 90, 20):
-            pts = [p for p in (self._proj(lat, lo) for lo in range(0, 366, 5)) if p]
-            for i in range(len(pts)-1):
-                self.create_line(*pts[i], *pts[i+1], fill=BORDER, width=1)
-        for lon in range(0, 360, 20):
-            pts = [p for p in (self._proj(la, lon) for la in range(-90, 91, 5)) if p]
-            for i in range(len(pts)-1):
-                self.create_line(*pts[i], *pts[i+1], fill=BORDER, width=1)
-        # Land dots
-        for lat, lon in (
-            [(la, lo) for la in range(30, 70, 7) for lo in range(-130, -60, 9)] +
-            [(la, lo) for la in range(-55, 15, 7) for lo in range(-80, -35, 9)] +
-            [(la, lo) for la in range(36, 70, 6)  for lo in range(-10, 40, 7)]  +
-            [(la, lo) for la in range(-35, 37, 6) for lo in range(-18, 52, 7)]  +
-            [(la, lo) for la in range(10, 75, 6)  for lo in range(40, 145, 7)] +
-            [(la, lo) for la in range(-44, -10, 6) for lo in range(114, 154, 7)]
-        ):
-            p = self._proj(lat, lon)
-            if p:
-                self.create_oval(p[0]-2, p[1]-2, p[0]+2, p[1]+2,
-                                 fill=CYAN, outline="")
-        # Equator
-        eq = [p for p in (self._proj(0, lo) for lo in range(0, 366, 4)) if p]
-        for i in range(len(eq)-1):
-            self.create_line(*eq[i], *eq[i+1], fill=CYAN, width=1)
+        cy = self.H // 2
+        xs = [self._nx(i) for i in range(len(self.NODES))]
 
-    def animate(self):
-        self.angle = (self.angle + 1) % 360
-        self._draw()
-        self.after(30, self.animate)
+        # Connector lines between nodes
+        for i in range(len(self.NODES) - 1):
+            both = self.NODES[i] in self._lit and self.NODES[i+1] in self._lit
+            col  = DFA_RING[self.NODES[i]] if both else BORDER2
+            self.create_line(xs[i] + self.NR, cy, xs[i+1] - self.NR, cy,
+                             fill=col, width=1)
 
+        # Self-loop arc on q3
+        x3 = xs[3]
+        lit3 = "q3" in self._lit
+        self.create_arc(x3 - self.NR - 2, cy - self.NR - 14,
+                        x3 + self.NR + 2, cy - self.NR + 6,
+                        start=20, extent=200, style="arc",
+                        outline=DFA_RING["q3"] if lit3 else MUTED, width=1)
 
-# ── DFA diagram with animated node traversal ─────────────────────────────────
-class DFACanvas(tk.Canvas):
-    NODES = [("q0", 20, 70), ("q1", 68, 24), ("q2", 128, 24), ("q3", 162, 80)]
-
-    def __init__(self, parent, **kw):
-        super().__init__(parent, width=186, height=148,
-                         bg=CARD, highlightthickness=0, **kw)
-        self._active = set()
-        self._draw()
-
-    def _draw(self):
-        self.delete("all")
-        pos = {}
-        for sid, x, y in self.NODES:
-            idle, active = DFA_NODE[sid]
-            lit = sid in self._active
-            r = 17
-            # Double ring for accepting state
+        # Nodes
+        for i, sid in enumerate(self.NODES):
+            x = xs[i]
+            lit  = sid in self._lit
+            ring = DFA_RING[sid]
+            # Outer glow for accepting state q3
             if sid == "q3":
-                self.create_oval(x-r-5, y-r-5, x+r+5, y+r+5,
-                                 outline=active if lit else idle,
-                                 width=1, dash=(4, 3))
-            # Node fill
-            fill = CARD if lit else PANEL
-            self.create_oval(x-r, y-r, x+r, y+r,
-                             fill=fill, outline=active if lit else idle,
+                self.create_oval(x - self.NR - 4, cy - self.NR - 4,
+                                 x + self.NR + 4, cy + self.NR + 4,
+                                 outline=ring if lit else MUTED,
+                                 width=1, dash=(3, 3))
+            fill = RAISED if lit else SURF
+            self.create_oval(x - self.NR, cy - self.NR,
+                             x + self.NR, cy + self.NR,
+                             fill=fill,
+                             outline=ring if lit else MUTED,
                              width=2 if lit else 1)
-            self.create_text(x, y, text=sid,
-                             font=("Consolas", 8, "bold"),
-                             fill=active if lit else idle)
-            pos[sid] = (x, y, r)
+            self.create_text(x, cy,
+                             text=sid, font=("Consolas", 8, "bold"),
+                             fill=ring if lit else SUB)
 
-        # Arrows q0→q1→q2→q3
-        for a, b in [("q0","q1"), ("q1","q2"), ("q2","q3")]:
-            x1,y1,r1 = pos[a]; x2,y2,r2 = pos[b]
-            dx, dy = x2-x1, y2-y1
-            d  = math.hypot(dx, dy) or 1
-            sx, sy = x1 + dx/d*r1, y1 + dy/d*r1
-            ex, ey = x2 - dx/d*r2, y2 - dy/d*r2
-            both_lit = a in self._active and b in self._active
-            col = CYAN if both_lit else MUTED
-            self.create_line(sx, sy, ex, ey, arrow=tk.LAST,
-                             fill=col, width=1, arrowshape=(6,8,3))
+        # State label on far right
+        lbl = f"State: {max(self._lit, key=self.NODES.index)}" if self._lit else "State: —"
+        self.create_text(self.W - 8, cy, text=lbl,
+                         font=F8, fill=SUB, anchor="e")
 
-        # Self-loop on q3
-        x, y, _ = pos["q3"]
-        lit = "q3" in self._active
-        self.create_arc(x-18, y-34, x+18, y-2,
-                        start=0, extent=260, style="arc",
-                        outline=RED if lit else MUTED, width=1)
-
-        self.create_text(93, 136, text="q0  →  q1  →  q2  →  q3",
-                         font=("Segoe UI", 7), fill=MUTED)
-
-    def traverse_to(self, final_state, _idx=0):
-        """Animate DFA by lighting up nodes one by one up to final_state."""
-        order = ["q0", "q1", "q2", "q3"]
-        target_i = order.index(final_state)
-        if _idx <= target_i:
-            self._active = set(order[:_idx+1])
+    def traverse(self, final_state: str, step: int = 0):
+        """Light nodes up one by one until final_state is reached."""
+        idx = self.NODES.index(final_state)
+        if step <= idx:
+            self._lit = set(self.NODES[:step + 1])
             self._draw()
-            self.after(220, lambda: self.traverse_to(final_state, _idx+1))
+            self.after(230, lambda: self.traverse(final_state, step + 1))
 
     def reset(self):
-        self._active = set()
+        self._lit = set()
         self._draw()
 
 
-# ── Scan pulse (shown while "analyzing") ─────────────────────────────────────
-class ScanPulse(tk.Canvas):
-    """Animated horizontal scan line — purely decorative feedback."""
+# ══════════════════════════════════════════════════════════════════════════════
+#  RESULT PANEL — right side, shows empty state or full analysis
+# ══════════════════════════════════════════════════════════════════════════════
 
-    def __init__(self, parent, w, h=3, **kw):
-        super().__init__(parent, width=w, height=h,
-                         bg=CARD, highlightthickness=0, **kw)
-        self._w = w
-        self._h = h
-        self._pos  = 0
-        self._going = False
+class ResultPanel(tk.Frame):
+    """Right-hand panel. Switches between idle and result views."""
 
-    def start(self, text_widget_height):
-        self._total_h = text_widget_height
-        self._going   = True
-        self._pos     = 0
-        self._step()
+    def __init__(self, parent, **kw):
+        super().__init__(parent, bg=BG, **kw)
+        self._score_target = 0
+        self._build_idle()
 
-    def _step(self):
-        if not self._going:
+    # ── Idle / empty state ───────────────────────────────────────────────────
+
+    def _build_idle(self):
+        self._clear_children()
+        wrapper = tk.Frame(self, bg=BG)
+        wrapper.place(relx=0.5, rely=0.5, anchor="center")
+
+        # Shield icon drawn with canvas
+        c = tk.Canvas(wrapper, width=56, height=62,
+                      bg=BG, highlightthickness=0)
+        c.pack()
+        # Body of shield
+        pts = [28, 4,  52, 14,  52, 34,  28, 58,  4, 34,  4, 14]
+        c.create_polygon(pts, outline=MUTED, fill="", width=2)
+        # Inner checkmark placeholder
+        c.create_text(28, 33, text="?", font=("Segoe UI", 18), fill=MUTED)
+
+        tk.Label(wrapper, text="No analysis yet",
+                 font=("Segoe UI", 13, "bold"), bg=BG, fg=SUB).pack(pady=(18, 4))
+        tk.Label(wrapper, text="Paste an email on the left\nand click Analyze.",
+                 font=F10, bg=BG, fg=MUTED, justify="center").pack()
+
+    # ── Result view ──────────────────────────────────────────────────────────
+
+    def show_result(self, r: dict):
+        self._clear_children()
+        fg, bg_dim, bdr = V[r["verdict"]]
+        score = r["score"]
+
+        # ── Hero: verdict + score ─────────────────────────────────────────
+        hero = tk.Frame(self, bg=bg_dim, padx=24, pady=22)
+        hero.pack(fill="x")
+
+        top_row = tk.Frame(hero, bg=bg_dim)
+        top_row.pack(fill="x")
+
+        tk.Label(top_row, text=r["verdict"],
+                 font=("Segoe UI", 42, "bold"),
+                 bg=bg_dim, fg=fg).pack(side="left")
+
+        # Score block on the right
+        score_f = tk.Frame(top_row, bg=bg_dim)
+        score_f.pack(side="right", anchor="s", pady=(10, 0))
+        self._score_lbl = tk.Label(score_f, text="0%",
+                                   font=("Segoe UI", 28, "bold"),
+                                   bg=bg_dim, fg=fg)
+        self._score_lbl.pack()
+        tk.Label(score_f, text="spam score",
+                 font=F8, bg=bg_dim, fg=fg).pack()
+
+        # Subtitle
+        subtitles = {
+            "SPAM":       "High likelihood of spam. Do not engage.",
+            "SUSPICIOUS": "Proceed with caution. Several indicators found.",
+            "SAFE":       "No significant spam signals detected.",
+        }
+        tk.Label(hero, text=subtitles[r["verdict"]],
+                 font=F10, bg=bg_dim, fg=fg).pack(anchor="w", pady=(6, 0))
+
+        # ── Meta row: DFA state + keyword count ───────────────────────────
+        meta = tk.Frame(self, bg=SURF, padx=24, pady=10)
+        meta.pack(fill="x")
+        tk.Frame(meta, bg=bdr, height=1).place(relx=0, rely=0, relwidth=1)
+
+        for label, value, col in [
+            ("DFA State",     r["state"],                      fg),
+            ("Accepted",      "Yes" if r["accepted"] else "No", fg),
+            ("Keyword hits",  str(r["total_kw"]),               TEXT),
+            ("Pattern hits",  str(len(r["re_hits"])),           TEXT),
+        ]:
+            cell = tk.Frame(meta, bg=SURF)
+            cell.pack(side="left", padx=(0, 32))
+            tk.Label(cell, text=label.upper(),
+                     font=("Segoe UI", 7), bg=SURF, fg=MUTED).pack(anchor="w")
+            tk.Label(cell, text=value,
+                     font=("Segoe UI", 12, "bold"), bg=SURF, fg=col).pack(anchor="w")
+
+        # ── Findings scroll area ──────────────────────────────────────────
+        scroll_f = tk.Frame(self, bg=BG)
+        scroll_f.pack(fill="both", expand=True)
+
+        canvas = tk.Canvas(scroll_f, bg=BG, highlightthickness=0,
+                           yscrollcommand=lambda *a: vsb.set(*a))
+        vsb = tk.Scrollbar(scroll_f, orient="vertical",
+                           command=canvas.yview, width=8)
+        vsb.pack(side="right", fill="y")
+        canvas.pack(side="left", fill="both", expand=True)
+
+        inner = tk.Frame(canvas, bg=BG)
+        win_id = canvas.create_window(0, 0, anchor="nw", window=inner)
+
+        def _on_resize(e):
+            canvas.itemconfig(win_id, width=e.width)
+        canvas.bind("<Configure>", _on_resize)
+
+        def _on_frame(e):
+            canvas.configure(scrollregion=canvas.bbox("all"))
+        inner.bind("<Configure>", _on_frame)
+
+        canvas.bind_all("<MouseWheel>",
+                        lambda e: canvas.yview_scroll(-1*(e.delta//120), "units"))
+
+        pad = dict(padx=24, pady=0)
+
+        # Keyword findings
+        if r["kw_hits"]:
+            self._section(inner, "KEYWORD MATCHES", **pad)
+            for cat, kws in r["kw_hits"].items():
+                self._finding_row(inner, cat, kws, fg, **pad)
+
+        # Regex findings
+        if r["re_hits"]:
+            self._section(inner, "PATTERN MATCHES", pady=(16, 0), padx=24)
+            for lbl, count in r["re_hits"]:
+                self._regex_row(inner, lbl, count, **pad)
+
+        tk.Frame(inner, bg=BG, height=20).pack()
+
+        # Animate score
+        self._animate_score(score, fg, bg_dim)
+
+    # ── Sub-widgets ───────────────────────────────────────────────────────────
+
+    def _section(self, parent, title, **kw):
+        f = tk.Frame(parent, bg=BG)
+        f.pack(fill="x", pady=(20, 6), **{k: v for k,v in kw.items()
+                                           if k != "pady"})
+        tk.Label(f, text=title, font=("Segoe UI", 8, "bold"),
+                 bg=BG, fg=MUTED).pack(side="left")
+        tk.Frame(f, bg=BORDER, height=1).pack(side="left", fill="x",
+                                               expand=True, padx=(10, 0))
+
+    def _finding_row(self, parent, category: str, kws: list, accent: str, **kw):
+        row = tk.Frame(parent, bg=RAISED)
+        row.pack(fill="x", pady=1, **{k: v for k,v in kw.items()
+                                       if k != "pady"})
+        row.configure(highlightbackground=BORDER, highlightthickness=1)
+
+        inner = tk.Frame(row, bg=RAISED, padx=14, pady=10)
+        inner.pack(fill="x")
+
+        tk.Label(inner, text=category, font=BOLD,
+                 bg=RAISED, fg=TEXT).pack(side="left", anchor="w")
+
+        count_f = tk.Frame(inner, bg=MUTED, padx=6, pady=2)
+        count_f.pack(side="right", anchor="center")
+        tk.Label(count_f, text=str(len(kws)),
+                 font=("Segoe UI", 8, "bold"), bg=MUTED, fg=TEXT).pack()
+
+        # Keyword chips
+        chips_f = tk.Frame(row, bg=RAISED, padx=14)
+        chips_f.pack(fill="x", pady=(0, 10))
+
+        chip_row = tk.Frame(chips_f, bg=RAISED)
+        chip_row.pack(anchor="w")
+        for kw_text in kws[:6]:
+            chip = tk.Frame(chip_row, bg=SURF, padx=7, pady=3)
+            chip.pack(side="left", padx=(0, 5))
+            tk.Label(chip, text=kw_text, font=("Segoe UI", 8),
+                     bg=SURF, fg=SUB).pack()
+        if len(kws) > 6:
+            tk.Label(chip_row, text=f"+{len(kws)-6} more",
+                     font=F8, bg=RAISED, fg=MUTED).pack(side="left", padx=4)
+
+    def _regex_row(self, parent, label: str, count: int, **kw):
+        row = tk.Frame(parent, bg=SURF, pady=0)
+        row.pack(fill="x", pady=1, **{k: v for k,v in kw.items()
+                                       if k != "pady"})
+        inner = tk.Frame(row, bg=SURF, padx=14, pady=9)
+        inner.pack(fill="x")
+        tk.Label(inner, text=label, font=F10,
+                 bg=SURF, fg=TEXT).pack(side="left")
+        tk.Label(inner, text=f"×{count}", font=("Consolas", 9, "bold"),
+                 bg=SURF, fg=SUB).pack(side="right")
+
+    def _animate_score(self, target: int, fg: str, bg: str, step: int = 0):
+        frames = 36
+        if step > frames:
             return
-        self.delete("all")
-        self.create_rectangle(0, 0, self._w, self._h, fill=CYAN, outline="")
-        # We just pulse the bar color
-        self.after(40, self._step)
+        t = step / frames
+        eased = 1 - (1 - t) ** 3
+        self._score_lbl.configure(text=f"{int(target * eased)}%", fg=fg, bg=bg)
+        if step < frames:
+            self.after(16, lambda: self._animate_score(target, fg, bg, step + 1))
 
-    def stop(self):
-        self._going = False
-        self.delete("all")
+    # ─────────────────────────────────────────────────────────────────────────
+
+    def _clear_children(self):
+        for w in self.winfo_children():
+            w.destroy()
 
 
-# ── Main application ──────────────────────────────────────────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
+#  MAIN APPLICATION
+# ══════════════════════════════════════════════════════════════════════════════
+
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("SpamGuard — Theory of Automata | IQRA University")
         self.configure(bg=BG)
-        self.geometry("1120x720")
-        self.minsize(920, 620)
+        self.geometry("1140x700")
+        self.minsize(960, 580)
         self._build()
-        self.globe.animate()
 
     # ── Layout ────────────────────────────────────────────────────────────────
 
     def _build(self):
         self._nav()
-        body = tk.Frame(self, bg=BG)
-        body.pack(fill="both", expand=True, padx=16, pady=12)
-
-        left = tk.Frame(body, bg=BG)
-        left.pack(side="left", fill="both", expand=True)
-
-        right = tk.Frame(body, bg=BG, width=210)
-        right.pack(side="right", fill="y", padx=(12, 0))
-        right.pack_propagate(False)
-
-        self._left_panel(left)
-        self._right_panel(right)
+        self._body()
+        self._footer()
 
     def _nav(self):
-        nav = tk.Frame(self, bg=PANEL, height=50)
-        nav.pack(fill="x")
-        nav.pack_propagate(False)
+        bar = tk.Frame(self, bg=SURF, height=46)
+        bar.pack(fill="x")
+        bar.pack_propagate(False)
         tk.Frame(self, bg=BORDER, height=1).pack(fill="x")
 
-        inner = tk.Frame(nav, bg=PANEL)
-        inner.pack(fill="both", padx=20)
+        inner = tk.Frame(bar, bg=SURF)
+        inner.pack(fill="both", expand=True, padx=24)
 
-        # Logo area
-        logo_f = tk.Frame(inner, bg=PANEL)
-        logo_f.pack(side="left", pady=12)
+        tk.Label(inner, text="SpamGuard",
+                 font=("Segoe UI", 12, "bold"), bg=SURF, fg=TEXT).pack(
+                     side="left", pady=12)
+        tk.Label(inner, text="  /  Theory of Automata",
+                 font=F10, bg=SURF, fg=MUTED).pack(side="left", pady=12)
 
-        dot = tk.Canvas(logo_f, width=8, height=8, bg=PANEL,
-                        highlightthickness=0)
-        dot.pack(side="left", padx=(0, 8))
-        dot.create_oval(0, 0, 8, 8, fill=CYAN, outline="")
-        self._pulse_dot(dot)
+        tk.Label(inner, text="IQRA University  ·  DFA + Regex Engine",
+                 font=F8, bg=SURF, fg=MUTED).pack(side="right", pady=16)
 
-        tk.Label(logo_f, text="SPAMGUARD", font=("Segoe UI", 12, "bold"),
-                 bg=PANEL, fg=TEXT).pack(side="left")
-        tk.Label(logo_f, text="  /  AUTOMATA ENGINE",
-                 font=("Segoe UI", 9), bg=PANEL, fg=MUTED).pack(side="left")
+    def _body(self):
+        body = tk.Frame(self, bg=BG)
+        body.pack(fill="both", expand=True)
 
-        # Right meta
-        meta = tk.Frame(inner, bg=PANEL)
-        meta.pack(side="right", pady=12)
-        tk.Label(meta, text="IQRA University  ·  Theory of Automata  ·  DFA / Regex",
-                 font=("Segoe UI", 8), bg=PANEL, fg=MUTED).pack()
+        # ── Left: email input ─────────────────────────────────────────────
+        left = tk.Frame(body, bg=BG, width=500)
+        left.pack(side="left", fill="both", expand=True)
+        left.pack_propagate(False)
 
-    def _pulse_dot(self, canvas, toggle=True):
-        canvas.delete("all")
-        color = CYAN if toggle else BLUE_DIM
-        canvas.create_oval(0, 0, 8, 8, fill=color, outline="")
-        canvas.after(800, lambda: self._pulse_dot(canvas, not toggle))
+        # Vertical right border
+        tk.Frame(body, bg=BORDER, width=1).pack(side="left", fill="y")
 
-    # ── Left panel ────────────────────────────────────────────────────────────
+        # ── Right: result panel ───────────────────────────────────────────
+        self.result = ResultPanel(body)
+        self.result.pack(side="left", fill="both", expand=True)
 
-    def _left_panel(self, p):
-        # ── Input card ────────────────────────────────────────
-        ic = self._card(p)
-        ic.pack(fill="both", expand=True, pady=(0, 10))
+        self._build_input(left)
 
-        hdr = tk.Frame(ic, bg=CARD)
-        hdr.pack(fill="x", pady=(0, 10))
-        tk.Label(hdr, text="EMAIL ANALYSIS", font=F_HEAD,
-                 bg=CARD, fg=TEXT).pack(side="left")
-        self._tag(hdr, "DFA POWERED", CYAN).pack(side="right")
+    def _build_input(self, parent):
+        pad = dict(padx=24)
 
-        self.txt = scrolledtext.ScrolledText(
-            ic, height=9, wrap="word", font=F_MONO,
-            bg=PANEL, fg=TEXT, insertbackground=CYAN,
-            selectbackground=BORDER,
-            relief="flat", borderwidth=0, padx=14, pady=12)
+        # Label row
+        label_row = tk.Frame(parent, bg=BG)
+        label_row.pack(fill="x", padx=24, pady=(20, 8))
+        tk.Label(label_row, text="EMAIL CONTENT",
+                 font=("Segoe UI", 8, "bold"), bg=BG, fg=MUTED).pack(side="left")
+
+        # Textarea with focus-border trick using a wrapper frame
+        border_wrap = tk.Frame(parent, bg=BORDER, padx=1, pady=1)
+        border_wrap.pack(fill="both", expand=True, **pad)
+
+        self.txt = tk.Text(
+            border_wrap, wrap="word", font=MONO,
+            bg=SURF, fg=TEXT, insertbackground=BLUE,
+            selectbackground=BORDER, selectforeground=TEXT,
+            relief="flat", borderwidth=0, padx=16, pady=14,
+            spacing1=2, spacing3=2)
         self.txt.pack(fill="both", expand=True)
 
-        self._ph = "Paste the full email body here to begin analysis..."
+        self.txt.bind("<FocusIn>",
+                      lambda e: border_wrap.configure(bg=BLUE))
+        self.txt.bind("<FocusOut>",
+                      lambda e: border_wrap.configure(bg=BORDER))
+
+        self._ph = "Paste the full email body here..."
         self.txt.insert("1.0", self._ph)
         self.txt.configure(fg=MUTED)
-        self.txt.bind("<FocusIn>",  self._ph_clear)
-        self.txt.bind("<FocusOut>", self._ph_restore)
+        self.txt.bind("<FocusIn>",  self._ph_clear,  add="+")
+        self.txt.bind("<FocusOut>", self._ph_restore, add="+")
 
-        # Scan pulse bar (sits between textarea and buttons)
-        self.scan_bar = tk.Frame(ic, bg=BORDER, height=1)
-        self.scan_bar.pack(fill="x", pady=(8, 0))
-        self._scan_anim_id = None
+        # ── Scan pulse bar ────────────────────────────────────────────────
+        self._scan_bar = tk.Frame(parent, bg=BORDER, height=2)
+        self._scan_bar.pack(fill="x", **pad)
+        self._scanning = False
 
-        br = tk.Frame(ic, bg=CARD)
-        br.pack(fill="x", pady=(10, 0))
+        # ── Action buttons ────────────────────────────────────────────────
+        btn_row = tk.Frame(parent, bg=BG)
+        btn_row.pack(fill="x", padx=24, pady=14)
 
-        self.analyze_btn = self._btn_primary(br, "▶  ANALYZE", self._analyze)
+        self.analyze_btn = tk.Button(
+            btn_row, text="Analyze", command=self._analyze,
+            font=("Segoe UI", 10, "bold"),
+            bg=BLUE, fg="white", activebackground=BLUE_D,
+            activeforeground="white", relief="flat",
+            cursor="hand2", padx=20, pady=8, bd=0)
         self.analyze_btn.pack(side="left")
-        self._btn_ghost(br, "Spam Sample", self._load_spam).pack(side="left", padx=(10, 0))
-        self._btn_ghost(br, "Safe Sample", self._load_safe).pack(side="left", padx=(6, 0))
-        self._btn_ghost(br, "Clear", self._clear, danger=True).pack(side="right")
 
-        # ── Results card ──────────────────────────────────────
-        rc = self._card(p)
-        rc.pack(fill="both", expand=True)
+        for label, cmd in [("Spam sample", self._load_spam),
+                            ("Safe sample", self._load_safe)]:
+            tk.Button(btn_row, text=label, command=cmd,
+                      font=F10, bg=RAISED, fg=SUB,
+                      activebackground=BORDER, activeforeground=TEXT,
+                      relief="flat", cursor="hand2",
+                      padx=14, pady=8, bd=0,
+                      highlightbackground=BORDER,
+                      highlightthickness=1).pack(side="left", padx=(8, 0))
 
-        hdr2 = tk.Frame(rc, bg=CARD)
-        hdr2.pack(fill="x", pady=(0, 10))
-        tk.Label(hdr2, text="ANALYSIS REPORT", font=F_HEAD,
-                 bg=CARD, fg=TEXT).pack(side="left")
-        self.status_tag = self._tag(hdr2, "READY", MUTED)
-        self.status_tag.pack(side="right")
+        tk.Button(btn_row, text="Clear", command=self._clear,
+                  font=F10, bg=BG, fg=MUTED,
+                  activebackground=BG, activeforeground=SUB,
+                  relief="flat", cursor="hand2",
+                  padx=14, pady=8, bd=0).pack(side="right")
 
-        row = tk.Frame(rc, bg=CARD)
-        row.pack(fill="both", expand=True)
+    def _footer(self):
+        tk.Frame(self, bg=BORDER, height=1).pack(fill="x")
+        foot = tk.Frame(self, bg=SURF, height=52)
+        foot.pack(fill="x")
+        foot.pack_propagate(False)
 
-        # Gauge + verdict column
-        gv = tk.Frame(row, bg=CARD, width=162)
-        gv.pack(side="left", fill="y")
-        gv.pack_propagate(False)
+        self.dfa_bar = DFABar(foot)
+        self.dfa_bar.pack(side="left", padx=24, pady=6)
 
-        self.gauge = ArcGauge(gv)
-        self.gauge.pack(pady=(4, 12))
-
-        tk.Frame(gv, bg=LINE, height=1).pack(fill="x")
-
-        vf = tk.Frame(gv, bg=CARD, pady=12, padx=8)
-        vf.pack(fill="x")
-        tk.Label(vf, text="VERDICT", font=F_SMALL, bg=CARD, fg=MUTED).pack(anchor="w")
-        self.v_lbl = tk.Label(vf, text="—", font=F_BADGE, bg=CARD, fg=MUTED)
-        self.v_lbl.pack(anchor="w", pady=(3, 0))
-
-        tk.Frame(gv, bg=LINE, height=1).pack(fill="x")
-
-        sf = tk.Frame(gv, bg=CARD, pady=10, padx=8)
-        sf.pack(fill="x")
-        tk.Label(sf, text="DFA STATE", font=F_SMALL, bg=CARD, fg=MUTED).pack(anchor="w")
-        self.st_lbl = tk.Label(sf, text="—",
-                               font=("Consolas", 13, "bold"), bg=CARD, fg=CYAN)
-        self.st_lbl.pack(anchor="w", pady=(3, 0))
-
-        # Vertical divider
-        tk.Frame(row, bg=LINE, width=1).pack(side="left", fill="y", padx=(12, 0))
-
-        # Detail log
-        self.detail = scrolledtext.ScrolledText(
-            row, font=F_MONO, bg=PANEL, fg=SUB,
-            state="disabled", relief="flat", borderwidth=0,
-            padx=14, pady=12, selectbackground=BORDER)
-        self.detail.pack(side="left", fill="both", expand=True)
-
-    # ── Right panel ───────────────────────────────────────────────────────────
-
-    def _right_panel(self, p):
-        # Globe card
-        gc = self._card(p)
-        gc.pack(fill="x")
-        hdr = tk.Frame(gc, bg=CARD)
-        hdr.pack(fill="x", pady=(0, 8))
-        tk.Label(hdr, text="LIVE GLOBE", font=F_HEAD, bg=CARD, fg=TEXT).pack(side="left")
-        self._tag(hdr, "ROTATING", CYAN).pack(side="right")
-        self.globe = Globe(gc, size=154)
-        self.globe.pack()
-
-        # DFA diagram card
-        dc = self._card(p)
-        dc.pack(fill="x", pady=(10, 0))
-        hdr2 = tk.Frame(dc, bg=CARD)
-        hdr2.pack(fill="x", pady=(0, 8))
-        tk.Label(hdr2, text="DFA MACHINE", font=F_HEAD, bg=CARD, fg=TEXT).pack(side="left")
-        self._tag(hdr2, "ANIMATED", BLUE).pack(side="right")
-        self.dfa = DFACanvas(dc)
-        self.dfa.pack()
-
-        # Stats card
-        sc = self._card(p)
-        sc.pack(fill="x", pady=(10, 0))
-        tk.Label(sc, text="STATS", font=F_HEAD, bg=CARD, fg=TEXT).pack(anchor="w", pady=(0, 8))
-
-        self.stat_kw  = self._stat_row(sc, "Keyword hits", "—")
-        self.stat_re  = self._stat_row(sc, "Regex matches", "—")
-        self.stat_acc = self._stat_row(sc, "DFA accepted", "—")
-
-        tk.Frame(sc, bg=LINE, height=1).pack(fill="x", pady=(10, 8))
-
-        for name in ("Moniza Fatima", "Laraib Suikarno"):
-            tk.Label(sc, text=name, font=F_SMALL, bg=CARD, fg=MUTED).pack(anchor="w")
-        tk.Label(sc, text="Miss Alisha Farmaan", font=F_SMALL,
-                 bg=CARD, fg=MUTED).pack(anchor="w")
-
-    def _stat_row(self, parent, label, value):
-        f = tk.Frame(parent, bg=CARD)
-        f.pack(fill="x", pady=2)
-        tk.Label(f, text=label, font=F_SMALL, bg=CARD, fg=MUTED).pack(side="left")
-        lbl = tk.Label(f, text=value, font=("Consolas", 9, "bold"), bg=CARD, fg=SUB)
-        lbl.pack(side="right")
-        return lbl
-
-    # ── Widget helpers ────────────────────────────────────────────────────────
-
-    def _card(self, parent):
-        outer = tk.Frame(parent, bg=BORDER, padx=1, pady=1)
-        inner = tk.Frame(outer, bg=CARD, padx=14, pady=12)
-        inner.pack(fill="both", expand=True)
-        # Wrap pack so calling code packs outer automatically
-        _orig_pack = inner.pack
-
-        def _smart_pack(**kw):
-            outer.pack(**kw)
-        inner.pack = _smart_pack    # redirect inner.pack → outer.pack
-        return inner
-
-    # Map accent colors to muted bg equivalents for tag backgrounds
-    _TAG_BG = {
-        "#22D3EE": "#0C2A30",  # CYAN
-        "#3B82F6": "#0C1A30",  # BLUE
-        "#EF4444": "#2D0A0A",  # RED
-        "#F59E0B": "#2D1F0A",  # AMBER
-        "#10B981": "#052512",  # GREEN
-        "#3E5070": "#131C28",  # MUTED
-    }
-
-    def _tag(self, parent, text, color):
-        bg = self._TAG_BG.get(color, PANEL)
-        f = tk.Frame(parent, bg=bg, padx=6, pady=2)
-        tk.Label(f, text=text, font=("Segoe UI", 7, "bold"),
-                 bg=bg, fg=color).pack()
-        return f
-
-    def _btn_primary(self, parent, text, cmd):
-        return tk.Button(parent, text=text, command=cmd,
-                         font=("Segoe UI", 9, "bold"),
-                         bg=BLUE, fg="white", activebackground=BLUE_DIM,
-                         activeforeground="white", relief="flat",
-                         cursor="hand2", padx=16, pady=7, bd=0)
-
-    def _btn_ghost(self, parent, text, cmd, danger=False):
-        fg = RED if danger else SUB
-        return tk.Button(parent, text=text, command=cmd, font=F_BODY,
-                         bg=PANEL, fg=fg, activebackground=CARD,
-                         activeforeground=fg, relief="flat",
-                         cursor="hand2", padx=12, pady=7, bd=0)
+        credits = tk.Frame(foot, bg=SURF)
+        credits.pack(side="right", padx=24)
+        tk.Label(credits,
+                 text="Moniza Fatima  ·  Laraib Suikarno  ·  Miss Alisha Farmaan",
+                 font=F8, bg=SURF, fg=MUTED).pack(anchor="e")
 
     # ── Placeholder ───────────────────────────────────────────────────────────
 
@@ -614,25 +571,30 @@ class App(tk.Tk):
             self.txt.insert("1.0", self._ph)
             self.txt.configure(fg=MUTED)
 
-    # ── Samples ───────────────────────────────────────────────────────────────
+    # ── Sample loaders ────────────────────────────────────────────────────────
 
     def _load_spam(self):
-        self._set("DEAR USER!! You have WON a $1,000,000 LOTTERY PRIZE!\n"
-                  "Click here to CLAIM NOW and verify your account immediately.\n"
-                  "LIMITED TIME offer – ACT NOW before it expires!\n"
-                  "Download now FREE software to activate your reward.\n"
-                  "Wire transfer details required. Respond immediately.\n"
-                  "Visit: https://claim-prize.free.net/verify?id=12345678901234\n"
-                  "Unsubscribe | Risk free trial | 100% Safe Guaranteed!!")
+        self._set_text(
+            "DEAR USER!! You have WON a $1,000,000 LOTTERY PRIZE!\n"
+            "Click here to CLAIM NOW and verify your account immediately.\n"
+            "LIMITED TIME offer – ACT NOW before it expires!\n"
+            "Download now FREE software to activate your reward.\n"
+            "Wire transfer details required. Respond immediately.\n"
+            "Visit: https://claim-prize.free.net/verify?id=12345678901234\n"
+            "Unsubscribe | Risk free trial | 100% Safe Guaranteed!!"
+        )
 
     def _load_safe(self):
-        self._set("Hi Alex,\n\nI hope you are doing well. Please find attached "
-                  "the meeting notes from yesterday's discussion.\n\n"
-                  "The team meeting is Thursday at 3 PM in conference room B. "
-                  "Please bring your laptop and the quarterly report.\n\n"
-                  "Best regards,\nSarah\nProject Manager")
+        self._set_text(
+            "Hi Alex,\n\n"
+            "I hope you're doing well. Please find attached the meeting notes "
+            "from yesterday's discussion. Let me know if you have any questions.\n\n"
+            "The team meeting is scheduled for Thursday at 3 PM in conference room B. "
+            "Please bring your laptop and the quarterly report.\n\n"
+            "Best regards,\nSarah\nProject Manager"
+        )
 
-    def _set(self, txt):
+    def _set_text(self, txt: str):
         self.txt.configure(fg=TEXT)
         self.txt.delete("1.0", "end")
         self.txt.insert("1.0", txt)
@@ -642,124 +604,44 @@ class App(tk.Tk):
     def _clear(self):
         self.txt.delete("1.0", "end")
         self._ph_restore()
-        self.gauge.reset()
-        self.v_lbl.configure(text="—", fg=MUTED)
-        self.st_lbl.configure(text="—", fg=CYAN)
-        self._update_status_tag("READY", MUTED)
-        self.stat_kw.configure(text="—")
-        self.stat_re.configure(text="—")
-        self.stat_acc.configure(text="—")
-        self.dfa.reset()
-        self._set_detail("")
+        self.result._build_idle()
+        self.dfa_bar.reset()
 
-    # ── Scan bar animation ────────────────────────────────────────────────────
+    # ── Scan animation ────────────────────────────────────────────────────────
 
-    def _scan_start(self):
-        self._scan_colors = [CYAN, BLUE, CYAN, BLUE_DIM, BORDER]
-        self._scan_idx = 0
-        self._scan_tick()
-
-    def _scan_tick(self):
-        if not hasattr(self, '_scanning') or not self._scanning:
+    def _scan_tick(self, idx: int = 0):
+        if not self._scanning:
             return
-        c = self._scan_colors[self._scan_idx % len(self._scan_colors)]
-        self.scan_bar.configure(bg=c)
-        self._scan_idx += 1
-        self._scan_anim_id = self.after(60, self._scan_tick)
+        colors = [BLUE, "#005FD1", "#003D99", BORDER, BORDER, BLUE]
+        self._scan_bar.configure(bg=colors[idx % len(colors)])
+        self.after(55, lambda: self._scan_tick(idx + 1))
 
-    def _scan_stop(self):
-        self._scanning = False
-        if self._scan_anim_id:
-            self.after_cancel(self._scan_anim_id)
-            self._scan_anim_id = None
-        self.scan_bar.configure(bg=BORDER)
-
-    # ── Analyze ───────────────────────────────────────────────────────────────
+    # ── Core: analyze ─────────────────────────────────────────────────────────
 
     def _analyze(self):
         text = self.txt.get("1.0", "end-1c").strip()
         if not text or text == self._ph:
-            messagebox.showwarning("No Input",
-                                   "Paste an email before analyzing.", parent=self)
+            messagebox.showwarning("Empty input",
+                                   "Paste an email body first.", parent=self)
             return
 
-        # Show scanning state
+        # Start scan feedback
         self._scanning = True
-        self._scan_start()
-        self._update_status_tag("SCANNING...", CYAN)
-        self.analyze_btn.configure(state="disabled", bg=MUTED)
+        self.analyze_btn.configure(state="disabled", bg=MUTED,
+                                   text="Analyzing…")
+        self._scan_tick()
 
-        # Slight delay to let scan animation play one cycle before showing result
-        self.after(480, lambda: self._run_analysis(text))
+        self.after(500, lambda: self._finish(text))
 
-    def _run_analysis(self, text):
-        self._scan_stop()
-        self.analyze_btn.configure(state="normal", bg=BLUE)
+    def _finish(self, text: str):
+        self._scanning = False
+        self._scan_bar.configure(bg=BORDER)
+        self.analyze_btn.configure(state="normal", bg=BLUE, text="Analyze")
 
         r = analyze_email(text)
-        col, _, _ = VERDICT_CFG[r["verdict"]]
-
-        # Verdict + state
-        self.v_lbl.configure(text=r["verdict"], fg=col)
-        self.st_lbl.configure(text=r["state"], fg=col)
-        self._update_status_tag(r["verdict"], col)
-
-        # Stats
-        self.stat_kw.configure(text=str(r["total_kw"]), fg=col)
-        self.stat_re.configure(text=str(len(r["re_hits"])), fg=col)
-        self.stat_acc.configure(text="YES" if r["accepted"] else "NO",
-                                fg=RED if r["accepted"] else GREEN)
-
-        # Animated gauge
-        self.gauge.animate_to(r["score"], col, r["verdict"])
-
-        # Animated DFA traversal
-        self.dfa.reset()
-        self.after(200, lambda: self.dfa.traverse_to(r["state"]))
-
-        # Detail log
-        lines = [
-            f"  Verdict       {r['verdict']}",
-            f"  Spam Score    {r['score']}%",
-            f"  DFA State     {r['state']}",
-            f"  Accepted      {'Yes' if r['accepted'] else 'No'}",
-            f"  Keyword Hits  {r['total_kw']}",
-            "",
-            "  ── Keyword Matches " + "─" * 31,
-        ]
-        if r["kw_hits"]:
-            for cat, kws in r["kw_hits"].items():
-                lines.append(f"\n  {cat}")
-                lines += [f"    ·  {k}" for k in kws]
-        else:
-            lines.append("  None detected.")
-
-        lines += ["", "  ── Regex Matches " + "─" * 33]
-        lines += ([f"  ·  {lbl}  ×{n}" for lbl, n in r["re_hits"]]
-                  if r["re_hits"] else ["  None detected."])
-
-        lines += ["", "  ── DFA Path " + "─" * 37,
-                  "  q0  →  q1  →  q2  →  q3",
-                  f"  Halted at  {r['state']}"]
-
-        self._set_detail("\n".join(lines))
-
-    def _update_status_tag(self, text, color):
-        # Rebuild tag label in place
-        for w in self.status_tag.winfo_children():
-            w.destroy()
-        bg = self._TAG_BG.get(color, PANEL)
-        self.status_tag.configure(bg=bg)
-        tk.Label(self.status_tag, text=text,
-                 font=("Segoe UI", 7, "bold"),
-                 bg=bg, fg=color).pack()
-
-    def _set_detail(self, txt):
-        self.detail.configure(state="normal")
-        self.detail.delete("1.0", "end")
-        if txt:
-            self.detail.insert("1.0", txt)
-        self.detail.configure(state="disabled")
+        self.result.show_result(r)
+        self.dfa_bar.reset()
+        self.after(200, lambda: self.dfa_bar.traverse(r["state"]))
 
 
 if __name__ == "__main__":
