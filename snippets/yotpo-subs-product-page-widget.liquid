@@ -1,0 +1,23 @@
+<div class="yotpo-widget-instance"
+  auto-inject-target-selector=".product-single__form"
+  auto-inject-adjacent-strategy="BeforeBegin"
+  data-yotpo-instance-id="537451" 
+  product-handle="{{product.handle}}"
+  allow-out-of-form="true"
+  widget-type="SubscriptionsAddToCartWidget" 
+  full-format-product-price="{{ product.price | money }}" 
+  bundles-configuration="{{ product.metafields.bundles.configuration | escape }}"></div>
+
+<script>
+  function hideDuplicatedWidgets() {
+    const els = document.querySelectorAll('.yotpo-widget-subscriptions-add-to-cart.yotpo-widget-override-css');
+    if (els.length > 1) {
+      console.log('identified more than 1 subscription widget, removing rest')
+      for (var i=1;i<els.length;i++) {
+        els[i].parentElement.removeChild(els[i])
+      }
+    }
+    setTimeout(hideDuplicatedWidgets, 200);
+  }
+  hideDuplicatedWidgets();
+</script>

@@ -1,0 +1,274 @@
+@font-face {
+    font-family: "CoreRhino85BlackW01-Rg";
+    src: url("CoreRhino85BlackW01-Rg.eot");
+    src: url("CoreRhino85BlackW01-Rg.eot?#iefix") format("embedded-opentype"),
+      url("CoreRhino85BlackW01-Rg.woff2") format("woff2"),
+      url("CoreRhino85BlackW01-Rg.woff") format("woff"),
+      url("CoreRhino85BlackW01-Rg.ttf") format("truetype"),
+      url("CoreRhino85BlackW01-Rg.svg#CoreRhino85BlackW01-Rg") format("svg");
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
+  }
+  
+  @font-face {
+    font-family: "Core Rhino 55";
+    src: url("CoreRhino55Medium.eot");
+    src: url("CoreRhino55Medium.eot?#iefix") format("embedded-opentype"),
+      url("CoreRhino55Medium.woff2") format("woff2"),
+      url("CoreRhino55Medium.woff") format("woff"),
+      url("CoreRhino55Medium.ttf") format("truetype"),
+      url("CoreRhino55Medium.svg#CoreRhino55Medium") format("svg");
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  /*--------------------------------
+General
+--------------------------------*/
+h1,
+.h1,
+h2,
+.h2,
+h3,
+.h3,
+h4,
+.h4,
+h5,
+.h5,
+h6,
+.h6,
+h2.title,
+.caption .headline,
+.custom-html-container button,
+.global-button,
+.shopify-payment-button__button.shopify-payment-button__button--unbranded,
+.product-cta,
+.collection_title {
+  font-family: "CoreRhino85BlackW01-Rg";
+}
+
+.site-nav__dropdown-link.site-nav__dropdown-link--second-level {
+  font-family: var(--typeHeaderPrimary), var(--typeHeaderFallback);
+}
+
+p, span {
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+#yotpo-reviews-main-widget .yotpo-base-layout {
+  min-width: 75%;
+}
+
+.grid-product__image-mask, .product-main-slide.starting-slide.is-selected {
+  border: 18px solid;
+  border-color: var(--colorSmallImageBg);
+  background-color: #F3F3F3;
+}
+
+.page-content--product .product-main-slide.is-selected image-element {
+  padding: 20px;
+}
+
+.carousel:not(.flickity-enabled) {
+  display: none;
+}
+
+.carousel__image {
+  max-width: 140px;
+  opacity: 1;
+}
+
+.promo-insta .flex-grid--gutters {
+  margin-top: 0!important;
+  margin-left: 0!important;
+  margin-right: -4px;
+}
+.promo-insta .flex-grid__item {
+  padding-top: 0!important;
+  padding-left: 0!important;
+  padding-right: 4px;
+  padding-bottom: 4px;
+}
+.promo-insta .promo-grid__text h2 {
+  font-family: "CoreRhino85BlackW01-Rg";
+}
+
+.stocked-by-carousel .flickity-slider {
+  display: flex;
+  align-items: center;
+
+}
+.stocked-by-carousel .flickity-slider > div {
+  padding: 32px;
+}
+.stocked-by-carousel .carousel__image {
+  max-width: 125px;
+}
+
+.site-footer > .page-width > .grid {
+  display: flex;
+}
+
+.footer-flex .footer__section {
+  margin-top: 0;
+}
+
+.footer-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #fff;
+  padding-top: 32px;
+  margin-top: 32px;
+}
+
+footer.site-footer {
+  padding-bottom: 24px;
+}
+
+div#root {
+  display: none;
+}
+
+html {
+  padding-bottom: 0!important;
+}
+
+.center-view-all-blog {
+  display: flex;
+  justify-content: center;
+}
+
+.template-article #comments {
+  display: none;
+}
+
+.loyalty-section {
+  display: block;
+  background-color: #FBF1E6;
+}
+
+.loyalty-section .page-width {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.loyalty-section .text-section p {
+  max-width: 483px;
+  margin: 0 auto;
+  font-size: 18px;
+}
+
+.loyalty-section .text-section h2 {
+  font-size: 48px;
+}
+
+.center {
+  text-align: center;
+}
+
+[data-center-text=true] .grid-product__meta {
+  text-align: left;
+}
+
+[data-type_product_capitalize=true] .grid-product__title {
+  text-transform: unset;
+}
+
+.grid-product__tag--sale, .grid-product__tag--sold-out {
+  background-color: #D59ED7;
+  border-radius: 50%;
+  height: 46px;
+  width: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-transform: uppercase;
+  text-align: center;
+  font-weight: 600;
+  padding: 0;
+  margin: 15px;
+  pointer-events: none;
+}
+
+.grid-product__tag--sold-out {
+  background-color: #9BCCC7!important;
+  color: #fff!important;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.article__grid-meta .article__title {
+  font-size: 18px;
+  font-family: "CoreRhino85BlackW01-Rg";
+}
+
+.article__grid-meta .article__excerpt {
+  display: block;
+}
+
+[data-center-text=true] .article__grid-meta {
+  text-align: left;
+}
+
+.webpage-sign-up-form .section-header, .loyaltyplantpowerclub .page-content {
+  display: none;
+}
+
+.section-header__shadow:before {
+  background: unset;
+}
+
+@media screen and (max-width: 1024px) {
+  .site-footer > .page-width > .grid {
+    flex-direction: column;
+  }
+
+  .footer-flex {
+    flex-direction: column;
+    gap: 16px;
+  }
+}
+
+ 
+.title-icon {
+    width: 42px !important;
+    margin-left: 0 !important;
+    padding-bottom: 30px;
+    margin-bottom: 30px !important;
+    border-bottom: 5px solid #90c6bf;
+}
+
+
+
+.image-text-icon {
+    width: 42px;
+    padding-bottom: 30px;
+    margin-bottom: 30px;
+    border-bottom: 5px solid #90c6bf;
+}
+
+.announcement-text {
+  font-size: 1.2em;
+}
+
+@media (max-width: 800px) {
+.loyalty-section .page-width {
+   display:block;
+    padding: 20px 20px 40px;
+}
+.loyalty-section .logo-bar__image {
+  width:50%;
+  max-width:400px;
+}
+
+.loyalty-section .text-section {
+  margin-bottom:30px;
+}
+  
+}
+

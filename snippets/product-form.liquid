@@ -1,0 +1,197 @@
+{%- form 'product', product, data-productid: product.id, id: form_id, class: 'product-single__form' -%}
+
+  {%- liquid
+    assign gift_card_recipient_feature_active = false
+    if block.settings.show_gift_card_recipient and product.gift_card?
+      assign gift_card_recipient_feature_active = true
+    endif
+
+    assign enable_dynamic_buttons = false
+    if show_dynamic_checkout and template != 'product.preorder' and gift_card_recipient_feature_active == false
+      assign enable_dynamic_buttons = true
+    endif
+  -%}
+
+  {%- if gift_card_recipient_feature_active -%}
+    {%- render 'gift-card-recipient-form', product: product, form: form, section: section -%}
+  {%- endif -%}
+
+  {%- if enable_dynamic_buttons -%}
+    <div class="payment-buttons">
+  {%- endif -%}
+
+    {%- liquid
+      assign default_text = 'products.product.add_to_cart' | t
+      assign button_text = 'products.product.add_to_cart' | t
+      if template contains 'preorder'
+        assign default_text = 'products.product.preorder' | t
+        assign button_text = 'products.product.preorder' | t
+      endif
+      unless current_variant.available
+        assign button_text = 'products.product.sold_out' | t
+      endunless
+    -%}
+{% render 'outlink-custom', product:product, o_showOutlink:1, o_hideCart:0 , o_classes: 'btn btn--full ', o_style: 'background: var(--colorBtnPrimary);
+    border: 1px solid transparent;border-radius: var(--buttonRadius);color: var(--colorBtnPrimaryText);padding: 11px 20px; text-align: center;width: 100%;margin-bottom: 5px; height: 50px;' %}
+
+<div class="o_original_{{ product.id }}">
+
+    <button
+      {% if product.empty? %}type="button"{% else %}type="submit"{% endif %}
+      name="add"
+      data-add-to-cart
+      class="btn btn--full add-to-cart{% if enable_dynamic_buttons and product.selling_plan_groups == empty %} btn--secondary{% endif %}"
+      {% unless current_variant.available %} disabled="disabled"{% endunless %}>
+      <span data-add-to-cart-text data-default-text="{{ default_text }}">
+        {{ button_text }}
+      </span>
+    </button>
+
+    {%- if enable_dynamic_buttons -%}
+      {{ form | payment_button }}
+    {%- endif -%}
+</div>
+  {%- if enable_dynamic_buttons -%}
+    </div>
+  {%- endif -%}
+
+  <div class="shopify-payment-terms product__policies">{{ form | payment_terms }}</div>
+
+  <select name="id" data-productid="{{ product.id }}" data-product-select class="product-single__variants no-js">
+    {%- for variant in product.variants -%}
+      {%- if variant.available -%}
+        <option {% if variant == product.selected_or_first_available_variant %}
+          selected="selected"{% endif %}
+          value="{{ variant.id }}">
+          {{ variant.title }} - {{ variant.price | money_with_currency }}
+        </option>
+      {%- else -%}
+        <option disabled="disabled">
+          {{ variant.title }} - {{ 'products.product.sold_out' | t }}
+        </option>
+      {%- endif -%}
+    {%- endfor -%}
+  </select>
+
+<script>
+  // Use a queue instead of overwriting the global callback
+  window._rcWidgetHandlers = window._rcWidgetHandlers || [];
+  window._rcWidgetHandlers.push({
+    productId: {{ product.id }},
+    formId: '{{ form_id }}',
+    init: function(widgetData) {
+      var form = document.getElementById('{{ form_id }}');
+      if (!form) return;
+
+      var btn = form.querySelector('[data-add-to-cart-text]');
+      if (!btn) return;
+
+      var defaultText = btn.textContent.trim() || 'Add to cart';
+      var subscribeText = 'Subscribe';
+
+      var acceleratedCheckout = form.querySelector('shopify-accelerated-checkout');
+      var consentText = form.querySelector('#shopify-buyer-consent');
+
+      function updateButtons(purchaseOption) {
+        btn.textContent = purchaseOption === 'subscription' ? subscribeText : defaultText;
+        if (acceleratedCheckout) {
+          acceleratedCheckout.style.display = purchaseOption === 'subscription' ? 'none' : '';
+        }
+        if (consentText) {
+          consentText.style.display = purchaseOption === 'subscription' ? 'block' : 'none';
+        }
+      }
+
+      updateButtons(widgetData.purchaseOption);
+      widgetData.events.onPurchaseOptionChange(function(option) {
+        updateButtons(option);
+      });
+    }
+  });
+
+  // Only the subscription product's widget will trigger this
+  window.RechargeSubscriptionWidgetReady = function(widgetData) {
+    window._rcWidgetHandlers.forEach(function(handler) {
+      if (handler.productId === widgetData.product.external_product_id) {
+        handler.init(widgetData);
+      }
+    });
+  };
+</script>
+
+  <!-- ============================================ -->
+  <!-- Task 03 — Sticky Mobile ATC Bar              -->
+  <!-- ============================================ -->
+  <div id="sticky-atc-bar-{{ product.id }}" class="sticky-atc-bar" aria-hidden="true">
+ 
+    <button id="sticky-atc-btn-{{ product.id }}" class="sticky-atc-bar__btn" type="button">
+      Add to cart
+    </button>
+  </div>
+
+  <script>
+  // Task 03 — Sticky Mobile ATC Bar JS
+  (function () {
+
+    // Mobile only — exit on desktop
+    if (window.innerWidth >= 769) return;
+
+    var productId = '{{ product.id }}';
+
+    var mainATCBtn = document.querySelector('.o_original_' + productId + ' button[name="add"][data-add-to-cart]');
+    if (!mainATCBtn) {
+      mainATCBtn = document.querySelector('button[name="add"][data-add-to-cart]');
+    }
+
+    var stickyBar = document.getElementById('sticky-atc-bar-' + productId);
+    var stickyBtn = document.getElementById('sticky-atc-btn-' + productId);
+
+    if (!mainATCBtn || !stickyBar || !stickyBtn) return;
+
+    // Sync text — handles Recharge "Subscribe" vs "Add to cart"
+    var mainBtnText = mainATCBtn.querySelector('[data-add-to-cart-text]');
+    if (mainBtnText) {
+      var textObserver = new MutationObserver(function () {
+        stickyBtn.textContent = mainBtnText.textContent.trim();
+      });
+      textObserver.observe(mainBtnText, { childList: true, characterData: true, subtree: true });
+    }
+
+    // Sync disabled state — sold out variant
+    var atcObserver = new MutationObserver(function () {
+      if (mainATCBtn.disabled) {
+        stickyBtn.disabled = true;
+        stickyBtn.style.opacity = '0.5';
+        stickyBtn.textContent = 'Sold out';
+      } else {
+        stickyBtn.disabled = false;
+        stickyBtn.style.opacity = '1';
+        stickyBtn.textContent = mainBtnText ? mainBtnText.textContent.trim() : 'Add to cart';
+      }
+    });
+    atcObserver.observe(mainATCBtn, { attributes: true, attributeFilter: ['disabled'] });
+
+    // Show bar only when main ATC scrolls out of view
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) {
+          stickyBar.classList.add('is-visible');
+          stickyBar.setAttribute('aria-hidden', 'false');
+        } else {
+          stickyBar.classList.remove('is-visible');
+          stickyBar.setAttribute('aria-hidden', 'true');
+        }
+      });
+    }, { threshold: 0 });
+
+    observer.observe(mainATCBtn);
+
+    // Click sticky btn = click main ATC exactly
+    stickyBtn.addEventListener('click', function () {
+      mainATCBtn.click();
+    });
+
+  })();
+  </script>
+
+{%- endform -%}

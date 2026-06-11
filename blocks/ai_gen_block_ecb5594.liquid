@@ -1,0 +1,225 @@
+{% doc %}
+  @prompt
+    A section that includes a block that takes 25% of the desktop width, has colour #D59ED7, opacity 10%, radius 10, top text in the block is body text 535353 and bottom text is slighly bigger, poppins bold colour #D59ED7, centred on the page, only block background to have opacity, not the text, please update so that i can change the text size
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-text-block-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .ai-text-block-container-{{ ai_gen_id }} {
+    position: relative;
+    padding: {{ block.settings.padding }}px;
+    width: {{ block.settings.desktop_width_percent }}%;
+    max-width: 100%;
+    text-align: center;
+    border-radius: {{ block.settings.border_radius }}px;
+    overflow: hidden;
+  }
+
+  .ai-text-block-container-{{ ai_gen_id }}::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: {{ block.settings.background_color }};
+    opacity: {{ block.settings.opacity | divided_by: 100.0 }};
+    border-radius: {{ block.settings.border_radius }}px;
+    z-index: 0;
+  }
+
+  .ai-text-block-content-{{ ai_gen_id }} {
+    position: relative;
+    z-index: 1;
+  }
+
+  .ai-text-block-top-{{ ai_gen_id }} {
+    color: {{ block.settings.top_text_color }};
+    font-family: {{ block.settings.top_text_font.family }}, {{ block.settings.top_text_font.fallback_families }};
+    font-weight: {{ block.settings.top_text_font.weight }};
+    font-size: {{ block.settings.top_text_size }}px;
+    margin: 0 0 {{ block.settings.text_spacing }}px 0;
+  }
+
+  .ai-text-block-bottom-{{ ai_gen_id }} {
+    color: {{ block.settings.bottom_text_color }};
+    font-family: {{ block.settings.bottom_text_font.family }}, {{ block.settings.bottom_text_font.fallback_families }};
+    font-weight: {{ block.settings.bottom_text_font.weight }};
+    font-size: {{ block.settings.bottom_text_size }}px;
+    margin: 0;
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-text-block-container-{{ ai_gen_id }} {
+      width: 100%;
+    }
+  }
+{% endstyle %}
+
+<div class="ai-text-block-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-text-block-container-{{ ai_gen_id }}">
+    <div class="ai-text-block-content-{{ ai_gen_id }}">
+      {% if block.settings.top_text != blank %}
+        <div class="ai-text-block-top-{{ ai_gen_id }}">
+          {{ block.settings.top_text }}
+        </div>
+      {% endif %}
+      {% if block.settings.bottom_text != blank %}
+        <div class="ai-text-block-bottom-{{ ai_gen_id }}">
+          {{ block.settings.bottom_text }}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Text block",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "richtext",
+      "id": "top_text",
+      "label": "Top text",
+      "default": "<p>Your top text here</p>"
+    },
+    {
+      "type": "richtext",
+      "id": "bottom_text",
+      "label": "Bottom text",
+      "default": "<p>Your bottom text here</p>"
+    },
+    {
+      "type": "range",
+      "id": "text_spacing",
+      "label": "Spacing between texts",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "header",
+      "content": "Top text style"
+    },
+    {
+      "type": "font_picker",
+      "id": "top_text_font",
+      "label": "Font",
+      "default": "poppins_n4"
+    },
+    {
+      "type": "range",
+      "id": "top_text_size",
+      "label": "Font size",
+      "min": 8,
+      "max": 60,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "color",
+      "id": "top_text_color",
+      "label": "Text color",
+      "default": "#535353"
+    },
+    {
+      "type": "header",
+      "content": "Bottom text style"
+    },
+    {
+      "type": "font_picker",
+      "id": "bottom_text_font",
+      "label": "Font",
+      "default": "poppins_n7"
+    },
+    {
+      "type": "range",
+      "id": "bottom_text_size",
+      "label": "Font size",
+      "min": 8,
+      "max": 60,
+      "step": 1,
+      "unit": "px",
+      "default": 18
+    },
+    {
+      "type": "color",
+      "id": "bottom_text_color",
+      "label": "Text color",
+      "default": "#D59ED7"
+    },
+    {
+      "type": "header",
+      "content": "Block style"
+    },
+    {
+      "type": "range",
+      "id": "desktop_width_percent",
+      "label": "Desktop width",
+      "min": 10,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 25
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#D59ED7"
+    },
+    {
+      "type": "range",
+      "id": "opacity",
+      "label": "Background opacity",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "padding",
+      "label": "Padding",
+      "min": 0,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "default": 20
+    }
+  ],
+  "presets": [
+    {
+      "name": "Text block"
+    }
+  ],
+  "tag": null
+}
+{% endschema %}

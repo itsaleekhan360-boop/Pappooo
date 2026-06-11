@@ -1,0 +1,354 @@
+{% doc %}
+  @prompt
+    self-scrolling carousel with a header and 7 logos , make the heading just h2, or maybe h3 colour 535353, i don't want the logos to be contained in a box each, i want them to have the same height and same distance between them
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-logo-carousel-{{ ai_gen_id }} {
+    display: block;
+    width: {{ block.settings.desktop_width_percent }}%;
+    max-width: 100%;
+    padding: {{ block.settings.section_padding }}px 0;
+    background-color: {{ block.settings.background_color }};
+  }
+
+  .ai-logo-carousel__container-{{ ai_gen_id }} {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  .ai-logo-carousel__header-{{ ai_gen_id }} {
+    text-align: center;
+    margin-bottom: {{ block.settings.header_spacing }}px;
+  }
+
+  .ai-logo-carousel__title-{{ ai_gen_id }} {
+    font-size: {{ block.settings.heading_size }}px;
+    color: #535353;
+    margin: 0;
+  }
+
+  .ai-logo-carousel__track-wrapper-{{ ai_gen_id }} {
+    overflow: hidden;
+    position: relative;
+  }
+
+  .ai-logo-carousel__track-{{ ai_gen_id }} {
+    display: flex;
+    gap: {{ block.settings.logo_spacing }}px;
+    animation: ai-logo-scroll-{{ ai_gen_id }} {{ block.settings.scroll_speed }}s linear infinite;
+    width: fit-content;
+    align-items: center;
+  }
+
+  .ai-logo-carousel__track-{{ ai_gen_id }}:hover {
+    animation-play-state: paused;
+  }
+
+  .ai-logo-carousel__item-{{ ai_gen_id }} {
+    flex-shrink: 0;
+    height: {{ block.settings.logo_height }}px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ai-logo-carousel__image-{{ ai_gen_id }} {
+    height: 100%;
+    width: auto;
+    object-fit: contain;
+    filter: grayscale({{ block.settings.grayscale_amount }}%);
+    opacity: {{ block.settings.logo_opacity }};
+    transition: all 0.3s ease;
+  }
+
+  .ai-logo-carousel__item-{{ ai_gen_id }}:hover .ai-logo-carousel__image-{{ ai_gen_id }} {
+    filter: grayscale(0%);
+    opacity: 1;
+  }
+
+  .ai-logo-carousel__placeholder-{{ ai_gen_id }} {
+    height: 100%;
+    width: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ai-logo-carousel__placeholder-{{ ai_gen_id }} svg {
+    width: 80px;
+    height: 80%;
+    opacity: 0.3;
+  }
+
+  @keyframes ai-logo-scroll-{{ ai_gen_id }} {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-logo-carousel__title-{{ ai_gen_id }} {
+      font-size: calc({{ block.settings.heading_size }}px * 0.8);
+    }
+
+    .ai-logo-carousel__item-{{ ai_gen_id }} {
+      height: {{ block.settings.logo_height | times: 0.7 }}px;
+    }
+  }
+{% endstyle %}
+
+<logo-carousel-{{ ai_gen_id }} class="ai-logo-carousel-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-logo-carousel__container-{{ ai_gen_id }}">
+    {% if block.settings.heading != blank %}
+      <div class="ai-logo-carousel__header-{{ ai_gen_id }}">
+        <h3 class="ai-logo-carousel__title-{{ ai_gen_id }}">{{ block.settings.heading }}</h3>
+      </div>
+    {% endif %}
+
+    <div class="ai-logo-carousel__track-wrapper-{{ ai_gen_id }}">
+      <div class="ai-logo-carousel__track-{{ ai_gen_id }}">
+        {% for i in (1..7) %}
+          {% assign logo_key = 'logo_' | append: i %}
+          {% assign logo = block.settings[logo_key] %}
+          
+          <div class="ai-logo-carousel__item-{{ ai_gen_id }}">
+            {% if logo %}
+              <img
+                src="{{ logo | image_url: width: 400 }}"
+                alt="{{ logo.alt | escape }}"
+                class="ai-logo-carousel__image-{{ ai_gen_id }}"
+                loading="lazy"
+                height="{{ block.settings.logo_height }}"
+              >
+            {% else %}
+              <div class="ai-logo-carousel__placeholder-{{ ai_gen_id }}">
+                {{ 'image' | placeholder_svg_tag }}
+              </div>
+            {% endif %}
+          </div>
+        {% endfor %}
+
+        {% for i in (1..7) %}
+          {% assign logo_key = 'logo_' | append: i %}
+          {% assign logo = block.settings[logo_key] %}
+          
+          <div class="ai-logo-carousel__item-{{ ai_gen_id }}">
+            {% if logo %}
+              <img
+                src="{{ logo | image_url: width: 400 }}"
+                alt="{{ logo.alt | escape }}"
+                class="ai-logo-carousel__image-{{ ai_gen_id }}"
+                loading="lazy"
+                height="{{ block.settings.logo_height }}"
+              >
+            {% else %}
+              <div class="ai-logo-carousel__placeholder-{{ ai_gen_id }}">
+                {{ 'image' | placeholder_svg_tag }}
+              </div>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</logo-carousel-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class LogoCarousel{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        this.track = this.querySelector('.ai-logo-carousel__track-{{ ai_gen_id }}');
+        this.setupAccessibility();
+      }
+
+      setupAccessibility() {
+        if (this.track) {
+          this.track.setAttribute('role', 'region');
+          this.track.setAttribute('aria-label', 'Logo carousel');
+        }
+      }
+    }
+
+    customElements.define('logo-carousel-{{ ai_gen_id }}', LogoCarousel{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Logo carousel",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Heading"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Trusted by leading brands"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "label": "Heading size",
+      "min": 16,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "header_spacing",
+      "label": "Spacing below heading",
+      "min": 10,
+      "max": 80,
+      "step": 5,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Logos"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo_1",
+      "label": "Logo 1"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo_2",
+      "label": "Logo 2"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo_3",
+      "label": "Logo 3"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo_4",
+      "label": "Logo 4"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo_5",
+      "label": "Logo 5"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo_6",
+      "label": "Logo 6"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo_7",
+      "label": "Logo 7"
+    },
+    {
+      "type": "header",
+      "content": "Logo style"
+    },
+    {
+      "type": "range",
+      "id": "logo_height",
+      "label": "Logo height",
+      "min": 40,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "logo_spacing",
+      "label": "Space between logos",
+      "min": 10,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "grayscale_amount",
+      "label": "Grayscale",
+      "min": 0,
+      "max": 100,
+      "step": 10,
+      "unit": "%",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "logo_opacity",
+      "label": "Opacity",
+      "min": 0,
+      "max": 1,
+      "step": 0.1,
+      "default": 0.8
+    },
+    {
+      "type": "header",
+      "content": "Animation"
+    },
+    {
+      "type": "range",
+      "id": "scroll_speed",
+      "label": "Scroll speed",
+      "min": 10,
+      "max": 60,
+      "step": 5,
+      "unit": "s",
+      "default": 30
+    },
+    {
+      "type": "header",
+      "content": "Section style"
+    },
+    {
+      "type": "range",
+      "id": "desktop_width_percent",
+      "label": "Desktop width",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "section_padding",
+      "label": "Vertical padding",
+      "min": 0,
+      "max": 100,
+      "step": 10,
+      "unit": "px",
+      "default": 60
+    }
+  ],
+  "presets": [
+    {
+      "name": "Logo carousel"
+    }
+  ]
+}
+{% endschema %}

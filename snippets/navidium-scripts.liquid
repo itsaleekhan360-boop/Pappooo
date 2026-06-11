@@ -1,0 +1,133 @@
+<style>
+    .cart__item:has([href*="navidium"]) {
+      display: none;
+  }
+
+    .grid__item.grid-product.small--one-half.medium-up--one-quarter.grid-product__has-quick-shop.aos-init.aos-animate:has([href*="navidium"]) {
+      display: none;
+  }
+    [data-product-id="7508852015277"]:has([href*="navidium"]) {
+      display: none;
+  }
+</style>
+{% comment %}
+  <!-- navidium script start -->
+  <script>
+    const nvdShop = 'sprout-organic.myshopify.com';
+    const nvdShopCurrency = '{{ shop.money_with_currency_format | strip_html }}';
+    const nvdControls = {
+      subtotal_item: '[data-subtotal]',
+      CheckoutBtns: '[name="checkout"], [name="checkout"] *',
+      clickTriggers: '[name="add"],[name="add"] *,.js-qty__adjust--plus,.js-qty__adjust--plus *,.js-qty__adjust--minus,.js-qty__adjust--minus *,.cart__remove,.cart__remove *',
+      changeTrigger: '.js-qty__num',
+     cursorControl: '.nvd-mini',
+      showConsoleMessage: false,
+      iosDeviceListener:'click',
+      trackWidget: false,
+      forceClick: true,
+      forceCheckout: true,
+      redirectCheckout: {
+        upsaleOff: true,
+        noProtection: false
+      },
+    nvdInject:{
+        status:false, // Inject nvd-mini div
+        parent:'parent_class', // parent class for nvd-mini div
+        container:'checkout_button_div' // nvd-mini will added before this div/button
+      }
+    }
+  </script>
+  <script src="https://navidium-static-assets.s3.amazonaws.com/navidium-widgets/js/nvd-widget-v-jquery.js" defer></script>
+  <script src="https://navidium-static-assets.s3.amazonaws.com/navidium-widgets/js/nvd-widget-v-jquery.js" defer></script>
+  <!-- navidium script end -->
+
+<!-- Navidium script start -->
+<script>
+  const nvdShop = 'sprout-organic.myshopify.com';
+  const nvdShopCurrency = '{{ shop.money_with_currency_format | strip_html }}';
+  const nvdControls = {
+    cartCounter: 'cart_counter_class', //cart item count
+    subtotal: '[data-subtotal]', // cart subtotal amount
+    lineAttribute: 'data-index', // cart item line
+    cartItemNodes: 'cart_nodes', // Cart items loop
+    quantityMinus: 'qty_minus', // Quantity decrase button
+    quantityPlus: 'qty_plus', // Quantity incrase button
+    removeItem: 'cart_remove_class', // Cart item remove btn class
+    qtybtnAttribute: 'data-href', // Cart item btn line update
+    qtyrmvAttribute: 'href', // Cart item remove line update
+    clickTriggers: '[name="add"],[name="add"] *,.js-qty__adjust--plus,.js-qty__adjust--plus *,.js-qty__adjust--minus,.js-qty__adjust--minus *,.cart__remove,.cart__remove *', // Onclick widget update
+    changeTrigger: '.js-qty__num', // Onchange widget update
+   cursorControl: '.nvd-mini', // Disabled/Enabled cursor pointer event
+    onLoadTrigger: false, // window.onload nvd_init function call
+    cartReload: false, // Cart reload for /cart page
+    showConsoleMessage:false, // Console message show/hide
+    trackWidget:false, // Track widget on realtime
+    forceClick: true, // forceclick for onclickTrigger event
+    autoHide: false, // Hide by JS according to cartItemNodes
+    initiateTime: 2000, //milisecond
+    nvdInject:{
+      status:false, // Inject nvd-mini div
+      parent:'parent_class', // parent class for nvd-mini div
+      container:'checkout_button_div' // nvd-mini will added before this div/button
+    }
+  }
+</script>
+<script
+  src="https://navidium-static-assets.s3.amazonaws.com/navidium-widgets/js/nvd-widget-c-v-n-1.min.js"
+  defer
+></script>
+<!-- End of Navidium script -->
+
+{% endcomment %}
+{% comment %} <script>
+window.needToInjectNvd = true;
+const injectNvdToCart = () => {
+  const parent = document.querySelector('#mu-checkout-container');
+  const nvdContainer = document.querySelector('#mu-checkout-button');
+  
+  if (!nvdContainer) return; 
+
+  const nvdDiv = document.createElement('div');
+  nvdDiv.setAttribute('class', 'nvd-mini w-nvd-100');
+
+  if (parent && !parent.innerHTML.includes('nvd-mini')) {
+    nvdContainer.parentNode.insertBefore(nvdDiv, nvdContainer);
+  }
+};
+
+window.addEventListener('click', (ev) => {
+  setTimeout(injectNvdToCart, 500);
+}, true);
+
+</script> {% endcomment %}
+<style>
+  button#nvd-with-checkout-btn>span,button#nvd-without-checkout-btn span {
+    font-size: 13px !important;
+}
+div#nvd-standard-widget-container {
+    min-width: 100%;
+}
+button#nvd-with-checkout-btn {
+    border-radius: 30px !important;
+}
+.cart__ctas:has(.nvd-mini div) [name="checkout"] {
+    display: none !important;
+}
+</style>
+<script>
+  window.addEventListener('nvd_cart_changed', (e) => {
+  if (e.detail?.added?.length != 0 || e?.detail?.removed?.length != 0) {
+    console.log('Cart changed::', e.detail)
+    setTimeout(nvd_init,1300)
+  }
+})
+</script>
+
+
+<script>
+window.addEventListener("pageshow", function (event) {
+  if (event.persisted) {
+    location.reload();
+  }
+});
+</script>

@@ -1,0 +1,349 @@
+{% doc %}
+  @prompt
+    i need a section that includes 4 rectangular block elements, colour EBF5F4, all edges rounded 10px radius, in total they would also take 50% of the page on desktop and it would be 2 blocks per each row. they would stack on mobile. each block to be divided into 2 columns, on the left to include the icon https://cdn.shopify.com/s/files/1/0505/7717/8797/files/icon_tick.svg and on the right text with a heading 16px poppins bold and smaller copy underneath. 10 px padding around the icon and 10px padding around the text component., please add margin on mobile, not full width 
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-feature-blocks-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+  }
+
+  .ai-feature-blocks-container-{{ ai_gen_id }} {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: {{ block.settings.gap }}px;
+    width: {{ block.settings.desktop_width_percent }}%;
+    max-width: 100%;
+    margin: 0 auto;
+  }
+
+  .ai-feature-block-{{ ai_gen_id }} {
+    background-color: {{ block.settings.block_bg_color }};
+    border-radius: {{ block.settings.border_radius }}px;
+    display: flex;
+    align-items: center;
+    gap: {{ block.settings.content_gap }}px;
+    padding: {{ block.settings.block_padding }}px;
+  }
+
+  .ai-feature-block-icon-{{ ai_gen_id }} {
+    flex-shrink: 0;
+    padding: {{ block.settings.icon_padding }}px;
+  }
+
+  .ai-feature-block-icon-{{ ai_gen_id }} img {
+    display: block;
+    width: {{ block.settings.icon_size }}px;
+    height: {{ block.settings.icon_size }}px;
+  }
+
+  .ai-feature-block-content-{{ ai_gen_id }} {
+    flex-grow: 1;
+    padding: {{ block.settings.text_padding }}px;
+  }
+
+  .ai-feature-block-heading-{{ ai_gen_id }} {
+    font-family: 'Poppins', sans-serif;
+    font-size: {{ block.settings.heading_size }}px;
+    font-weight: 700;
+    color: {{ block.settings.heading_color }};
+    margin: 0 0 {{ block.settings.heading_spacing }}px 0;
+  }
+
+  .ai-feature-block-text-{{ ai_gen_id }} {
+    font-size: {{ block.settings.text_size }}px;
+    color: {{ block.settings.text_color }};
+    margin: 0;
+    line-height: 1.4;
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-feature-blocks-container-{{ ai_gen_id }} {
+      grid-template-columns: 1fr;
+      width: calc(100% - {{ block.settings.mobile_margin }}px * 2);
+      margin: 0 {{ block.settings.mobile_margin }}px;
+    }
+  }
+{% endstyle %}
+
+<feature-blocks-{{ ai_gen_id }} class="ai-feature-blocks-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-feature-blocks-container-{{ ai_gen_id }}">
+    {% for i in (1..4) %}
+      {% liquid
+        assign heading_key = 'block_' | append: i | append: '_heading'
+        assign text_key = 'block_' | append: i | append: '_text'
+        assign heading = block.settings[heading_key]
+        assign text = block.settings[text_key]
+      %}
+      <div class="ai-feature-block-{{ ai_gen_id }}">
+        <div class="ai-feature-block-icon-{{ ai_gen_id }}">
+          <img 
+            src="{{ block.settings.icon_url }}" 
+            alt="Feature icon"
+            loading="lazy"
+            width="{{ block.settings.icon_size }}"
+            height="{{ block.settings.icon_size }}"
+          >
+        </div>
+        <div class="ai-feature-block-content-{{ ai_gen_id }}">
+          {% if heading != blank %}
+            <h3 class="ai-feature-block-heading-{{ ai_gen_id }}">{{ heading }}</h3>
+          {% endif %}
+          {% if text != blank %}
+            <p class="ai-feature-block-text-{{ ai_gen_id }}">{{ text }}</p>
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</feature-blocks-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class FeatureBlocks{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+    }
+    customElements.define('feature-blocks-{{ ai_gen_id }}', FeatureBlocks{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Feature blocks",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "desktop_width_percent",
+      "label": "Desktop width",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "mobile_margin",
+      "label": "Mobile margin",
+      "min": 0,
+      "max": 40,
+      "step": 5,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "gap",
+      "label": "Gap between blocks",
+      "min": 0,
+      "max": 40,
+      "step": 5,
+      "unit": "px",
+      "default": 15
+    },
+    {
+      "type": "header",
+      "content": "Block style"
+    },
+    {
+      "type": "color",
+      "id": "block_bg_color",
+      "label": "Background color",
+      "default": "#EBF5F4"
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "block_padding",
+      "label": "Block padding",
+      "min": 0,
+      "max": 40,
+      "step": 5,
+      "unit": "px",
+      "default": 15
+    },
+    {
+      "type": "range",
+      "id": "content_gap",
+      "label": "Gap between icon and text",
+      "min": 0,
+      "max": 40,
+      "step": 5,
+      "unit": "px",
+      "default": 15
+    },
+    {
+      "type": "header",
+      "content": "Icon"
+    },
+    {
+      "type": "text",
+      "id": "icon_url",
+      "label": "Icon URL",
+      "default": "https://cdn.shopify.com/s/files/1/0505/7717/8797/files/icon_tick.svg"
+    },
+    {
+      "type": "range",
+      "id": "icon_size",
+      "label": "Icon size",
+      "min": 20,
+      "max": 80,
+      "step": 5,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "icon_padding",
+      "label": "Icon padding",
+      "min": 0,
+      "max": 30,
+      "step": 5,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "header",
+      "content": "Text"
+    },
+    {
+      "type": "range",
+      "id": "text_padding",
+      "label": "Text padding",
+      "min": 0,
+      "max": 30,
+      "step": 5,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "label": "Heading size",
+      "min": 12,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#2b2a27"
+    },
+    {
+      "type": "range",
+      "id": "heading_spacing",
+      "label": "Heading bottom spacing",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "text_size",
+      "label": "Text size",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#535353"
+    },
+    {
+      "type": "header",
+      "content": "Block 1"
+    },
+    {
+      "type": "text",
+      "id": "block_1_heading",
+      "label": "Heading",
+      "default": "Feature heading"
+    },
+    {
+      "type": "textarea",
+      "id": "block_1_text",
+      "label": "Text",
+      "default": "Add a short description for this feature"
+    },
+    {
+      "type": "header",
+      "content": "Block 2"
+    },
+    {
+      "type": "text",
+      "id": "block_2_heading",
+      "label": "Heading",
+      "default": "Feature heading"
+    },
+    {
+      "type": "textarea",
+      "id": "block_2_text",
+      "label": "Text",
+      "default": "Add a short description for this feature"
+    },
+    {
+      "type": "header",
+      "content": "Block 3"
+    },
+    {
+      "type": "text",
+      "id": "block_3_heading",
+      "label": "Heading",
+      "default": "Feature heading"
+    },
+    {
+      "type": "textarea",
+      "id": "block_3_text",
+      "label": "Text",
+      "default": "Add a short description for this feature"
+    },
+    {
+      "type": "header",
+      "content": "Block 4"
+    },
+    {
+      "type": "text",
+      "id": "block_4_heading",
+      "label": "Heading",
+      "default": "Feature heading"
+    },
+    {
+      "type": "textarea",
+      "id": "block_4_text",
+      "label": "Text",
+      "default": "Add a short description for this feature"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Feature blocks"
+    }
+  ]
+}
+{% endschema %}
