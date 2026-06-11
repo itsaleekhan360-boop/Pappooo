@@ -1,0 +1,221 @@
+{% comment %}
+  COA Engine (TC Scan)
+
+  Invisible helper section. Renders NO visible content.
+  Add ONCE per page (anywhere — it's invisible).
+
+  What it does:
+    Reads the scan code from the URL → fetches batch + product from
+    Trust Codes API → for every COA Button section on the page,
+    constructs the COA URL → HEAD-checks → reveals if the PDF exists.
+
+    By default the URL pattern is:
+      {Files CDN base}{ingredient}-{batch}.pdf
+    For ingredients listed in "Product-specific ingredients" (e.g. VTM),
+    the URL becomes:
+      {Files CDN base}{ingredient}-{product}-{batch}.pdf
+
+  Pairs with: "COA Button" section (add 6 instances, one per ingredient).
+{% endcomment %}
+
+<style>
+  [data-coa-prefix]:not([data-coa-ready]) { display: none !important; }
+</style>
+
+<script id="coa-engine-config" type="application/json">
+{
+  "apiBase":          {{ section.settings.api_base                   | json }},
+  "coaBaseUrl":       {{ section.settings.coa_base_url               | json }},
+  "productMappings":  {{ section.settings.product_mappings           | json }},
+  "productSpecific":  {{ section.settings.product_specific_ingredients | json }}
+}
+</script>
+
+<script>
+(function() {
+  'use strict';
+  if (window.__coaEngineInit) return;
+  window.__coaEngineInit = true;
+
+  var CONFIG;
+  try { CONFIG = JSON.parse(document.getElementById('coa-engine-config').textContent); }
+  catch (e) { return; }
+
+  if (!CONFIG.apiBase || !/^https:\/\//i.test(CONFIG.apiBase)) return;
+
+  var CODE_RE = /^[a-zA-Z0-9]{8}$/;
+
+  function getCodeFromURL() {
+    var segments = window.location.pathname.split('/').filter(function(s){ return s.length > 0; });
+    if (segments.length) {
+      var last = segments[segments.length - 1];
+      if (last.length >= 8) {
+        var tail = last.slice(-8);
+        if (CODE_RE.test(tail)) return tail;
+      }
+    }
+    var params = new URLSearchParams(window.location.search);
+    var q = params.get('code') || params.get('c') || params.get('qr_id');
+    if (q && q.length >= 8) {
+      var qTail = q.slice(-8);
+      if (CODE_RE.test(qTail)) return qTail;
+    }
+    if (window.location.hash && window.location.hash.length > 1) {
+      var h = window.location.hash.substring(1);
+      if (h.length >= 8) {
+        var hTail = h.slice(-8);
+        if (CODE_RE.test(hTail)) return hTail;
+      }
+    }
+    return null;
+  }
+
+  function safeUrl(url) {
+    if (!url || typeof url !== 'string') return '';
+    var s = url.trim();
+    if (/^https?:\/\//i.test(s)) return s;
+    return '';
+  }
+
+  function sanitizeBatch(b) {
+    if (!b) return '';
+    return String(b).replace(/\s+/g, '_').replace(/[^A-Za-z0-9._-]/g, '');
+  }
+
+  function parsePipeMappings(raw) {
+    if (!raw) return [];
+    var out = [];
+    String(raw).split(/\r?\n/).forEach(function(line) {
+      var parts = line.split('|');
+      if (parts.length < 2) return;
+      var key   = parts[0].trim();
+      var value = parts.slice(1).join('|').trim();
+      if (key && value) out.push({ key: key, value: value });
+    });
+    return out;
+  }
+
+  function resolveProductCode(productName) {
+    if (!productName) return '';
+    var mappings = parsePipeMappings(CONFIG.productMappings);
+    var nameLower = String(productName).toLowerCase();
+    for (var i = 0; i < mappings.length; i++) {
+      if (nameLower.indexOf(mappings[i].key.toLowerCase()) !== -1) {
+        return mappings[i].value;
+      }
+    }
+    return '';
+  }
+
+  function revealCOA(el, url) {
+    el.setAttribute('href', url);
+    el.setAttribute('target', '_blank');
+    el.setAttribute('rel', 'noopener noreferrer');
+    el.setAttribute('data-coa-ready', '');
+  }
+
+  function parseProductSpecific(raw) {
+    if (!raw) return {};
+    var map = {};
+    String(raw).split(/[\r\n,]+/).forEach(function(token) {
+      var code = token.trim().toUpperCase();
+      if (code) map[code] = true;
+    });
+    return map;
+  }
+
+  function rewriteCOAButtons(data) {
+    var batch   = data.batch   || {};
+    var product = data.product || {};
+    var base = safeUrl(CONFIG.coaBaseUrl);
+    if (!base) return;
+    if (base.charAt(base.length - 1) !== '/') base += '/';
+    var batchSafe = sanitizeBatch(batch.number);
+    if (!batchSafe) return;
+    var productCode = resolveProductCode(product.name);
+    var productSpecific = parseProductSpecific(CONFIG.productSpecific);
+    var buttons = document.querySelectorAll('[data-coa-prefix]:not([data-coa-ready])');
+    for (var i = 0; i < buttons.length; i++) {
+      (function(el) {
+        var ingredient = (el.getAttribute('data-coa-prefix') || '').trim();
+        if (!ingredient) return;
+        var needsProduct = productSpecific[ingredient.toUpperCase()] === true;
+        if (needsProduct && !productCode) return;
+        var filenameStem = needsProduct
+          ? ingredient + '-' + productCode + '-' + batchSafe
+          : ingredient + '-' + batchSafe;
+        var url = base + encodeURIComponent(filenameStem) + '.pdf';
+        if (typeof fetch !== 'function') return;
+        fetch(url, { method: 'HEAD' })
+          .then(function(r) {
+            if (!r || !r.ok) return;
+            var ct = (r.headers.get('content-type') || '').toLowerCase();
+            if (ct.indexOf('pdf') === -1 && ct.indexOf('octet-stream') === -1) return;
+            revealCOA(el, url);
+          })
+          .catch(function() { /* network/CORS → stay hidden */ });
+      })(buttons[i]);
+    }
+  }
+
+  function fetchBatch(code) {
+    var xhr = new XMLHttpRequest();
+    var base = CONFIG.apiBase.replace(/\/+$/, '');
+    xhr.open('GET', base + '/scans/scan/' + encodeURIComponent(code) + '/', true);
+    xhr.setRequestHeader('Accept', 'application/json');
+    xhr.timeout = 15000;
+    xhr.onload = function() {
+      if (xhr.status !== 200) return;
+      try {
+        var data = JSON.parse(xhr.responseText);
+        rewriteCOAButtons(data);
+      } catch (e) {}
+    };
+    xhr.send();
+  }
+
+  function revealFallbackButtons() {
+    var buttons = document.querySelectorAll('[data-coa-prefix]:not([data-coa-ready])');
+    for (var i = 0; i < buttons.length; i++) {
+      var el = buttons[i];
+      var fallback = safeUrl(el.getAttribute('data-coa-fallback') || '');
+      if (!fallback) continue;
+      revealCOA(el, fallback);
+    }
+  }
+
+  function start() {
+    var code = getCodeFromURL();
+    if (!code) {
+      revealFallbackButtons();
+      return;
+    }
+    fetchBatch(code);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', start);
+  } else {
+    start();
+  }
+})();
+</script>
+
+{% schema %}
+{
+  "name": "COA Engine (TC Scan)",
+  "tag": "section",
+  "class": "coa-engine-section",
+  "settings": [
+    { "type": "paragraph", "content": "Invisible. Add once per page. Powers all 'COA Button' sections on the same page." },
+    { "type": "text",     "id": "api_base",         "label": "TC API base URL",            "default": "https://sprout.trust.codes/api/" },
+    { "type": "text",     "id": "coa_base_url",     "label": "Shopify Files CDN base URL", "default": "https://cdn.shopify.com/s/files/1/0505/7717/8797/files/" },
+    { "type": "textarea", "id": "product_mappings", "label": "Product → code mappings",    "default": "infant|IF\ntoddler|TD" },
+    { "type": "textarea", "id": "product_specific_ingredients",
+      "label": "Product-specific ingredients",
+      "info": "Ingredient codes (one per line or comma-separated) that have different COAs for Infant Formula vs Toddler Drink. Listed ingredients use INGREDIENT-PRODUCT-BATCH.pdf. Unlisted ones use INGREDIENT-BATCH.pdf.",
+      "default": "VTM" }
+  ],
+  "presets": [{ "name": "COA Engine (TC Scan)" }]
+}
+{% endschema %}

@@ -1,0 +1,114 @@
+{%- style -%}
+  .sub-banner-{{ section.id }} {
+    background-color: {{ section.settings.bg_color }};
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+  
+  .sub-banner-{{ section.id }} .sub-banner-content {
+    color: {{ section.settings.text_color }};
+  }
+{%- endstyle -%}
+
+<div class="index-section sub-banner-{{ section.id }} text-center" data-section-id="{{ section.id }}" data-section-type="subscription-banner">
+  <div class="page-width">
+    
+    {%- if section.settings.heading != blank -%}
+      <div class="section-header">
+        <h2 class="sub-banner-heading">{{ section.settings.heading | newline_to_br }}</h2>
+      </div>
+    {%- endif -%}
+
+    <div class="sub-banner-content">
+      {%- if section.settings.subtext != blank -%}
+        <div class="sub-banner-text rte-setting">
+          {{ section.settings.subtext }}
+        </div>
+      {%- endif -%}
+
+      {%- if section.settings.btn_label != blank -%}
+        <div class="sub-banner-btn-wrapper">
+          <a href="{{ section.settings.btn_link }}" class="btn">
+            {{ section.settings.btn_label }}
+          </a>
+        </div>
+      {%- endif -%}
+    </div>
+
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Subscription Banner",
+  "class": "index-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section Layout Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0, "max": 200, "step": 5, "unit": "px",
+      "label": "Padding Top",
+      "default": 120
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0, "max": 200, "step": 5, "unit": "px",
+      "label": "Padding Bottom",
+      "default": 120
+    },
+    {
+      "type": "header",
+      "content": "Content Settings"
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Never Run Out.\nAlways Save."
+    },
+    {
+      "type": "richtext",
+      "id": "subtext",
+      "label": "Subtext",
+      "default": "<p>Set up a subscription and have Sprout delivered when you need it. Skip, pause or cancel anytime.</p>"
+    },
+    {
+      "type": "text",
+      "id": "btn_label",
+      "label": "Button Label",
+      "default": "Start My Subscription"
+    },
+    {
+      "type": "url",
+      "id": "btn_link",
+      "label": "Button Link"
+    },
+    {
+      "type": "header",
+      "content": "Color Settings"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background Color",
+      "default": "#f9f9f9"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#1c1d1d"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Subscription Banner"
+    }
+  ]
+}
+{% endschema %}

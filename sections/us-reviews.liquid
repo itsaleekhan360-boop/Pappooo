@@ -1,0 +1,220 @@
+{% comment %}
+  Sprout Organic US Landing Page - Yotpo Reviews Section
+  File Path: Sections / us-reviews.liquid
+{% endcomment %}
+
+<div class="us-reviews-section-{{ section.id }} us-reviews-wrapper">
+  <div class="us-reviews-container">
+
+    <div class="us-reviews-header">
+      {% if section.settings.heading != blank %}
+        <h2 class="us-reviews-title">{{ section.settings.heading | escape }}</h2>
+      {% endif %}
+
+      <div class="us-reviews-rating-row">
+        <div class="us-reviews-stars">
+          {% for i in (1..5) %}
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="#ffb703" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.787 1.4 8.168L12 18.896l-7.334 3.857 1.4-8.168L.132 9.21l8.2-1.192L12 .587z"/>
+            </svg>
+          {% endfor %}
+        </div>
+        {% if section.settings.subheading != blank %}
+          <span class="us-reviews-rating-label">{{ section.settings.subheading | escape }}</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="us-reviews-widget-wrap">
+      <div class="yotpo yotpo-main-widget"
+        data-product-id="{{ product.id }}"
+        data-price="{{ product.price | money_without_currency }}"
+        data-currency="{{ shop.currency }}"
+        data-name="{{ product.title | escape }}"
+        data-url="{{ shop.url }}{{ product.url }}"
+        data-image-url="{{ product.featured_image | img_url: '400x' }}"
+      ></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  (function() {
+    var instanceId = '{{ section.settings.yotpo_instance_id | default: "537452" | escape }}';
+    var existingScript = document.querySelector('script[src*="staticw2.yotpo.com/YotpoWidgetsLoader.js"]');
+    if (!existingScript) {
+      var e = document.createElement('script');
+      e.type = 'text/javascript';
+      e.async = true;
+      e.src = 'https://staticw2.yotpo.com/' + instanceId + '/YotpoWidgetsLoader.js';
+      document.head.appendChild(e);
+    }
+    if (window.yotpo && typeof window.yotpo.refreshWidgets === 'function') {
+      window.yotpo.refreshWidgets();
+    }
+  })();
+</script>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap');
+
+  .us-reviews-section-{{ section.id }} {
+    width: 100%;
+    box-sizing: border-box;
+    background-color: {{ section.settings.bg_color }};
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+
+  .us-reviews-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 0 24px;
+    box-sizing: border-box;
+  }
+
+  .us-reviews-header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+
+  .us-reviews-title {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 38px;
+    font-weight: 700;
+    color: {{ section.settings.text_color }};
+    margin: 0 0 18px 0;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+  }
+
+  .us-reviews-rating-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .us-reviews-stars {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .us-reviews-rating-label {
+    font-family: 'Outfit', sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    color: {{ section.settings.text_color }};
+    opacity: 0.8;
+    letter-spacing: 0.3px;
+  }
+
+  .us-reviews-widget-wrap {
+    width: 100%;
+  }
+
+  @media (max-width: 768px) {
+    .us-reviews-section-{{ section.id }} {
+      padding-top: {{ section.settings.padding_top | times: 0.65 | round }}px;
+      padding-bottom: {{ section.settings.padding_bottom | times: 0.65 | round }}px;
+    }
+
+    .us-reviews-header {
+      margin-bottom: 32px;
+    }
+
+    .us-reviews-title {
+      font-size: 26px;
+    }
+
+    .us-reviews-rating-label {
+      font-size: 14px;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Reviews (US)",
+  "class": "shopify-section-us-reviews",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section Content"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Section Heading",
+      "default": "What Parents Say"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Rating Subheading",
+      "default": "4.7 stars · 300+ verified reviews"
+    },
+    {
+      "type": "header",
+      "content": "Yotpo Widget"
+    },
+    {
+      "type": "text",
+      "id": "yotpo_instance_id",
+      "label": "Yotpo Instance ID",
+      "default": "537452",
+      "info": "Find this in your Yotpo account settings."
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Section Background Color",
+      "default": "#f5f9f8"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#1c2b24"
+    },
+    {
+      "type": "header",
+      "content": "Section Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Top",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Bottom",
+      "default": 80
+    }
+  ],
+  "presets": [
+    {
+      "name": "Reviews (US)",
+      "category": "Social Proof"
+    }
+  ]
+}
+{% endschema %}

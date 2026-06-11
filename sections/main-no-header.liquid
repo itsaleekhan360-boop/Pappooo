@@ -1,0 +1,15 @@
+<div class="page-width page-width--narrow page-content">
+  {%- render 'breadcrumbs' -%}
+
+
+  <div class="rte rte--nomargin">
+    {{ page.content }}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "t:sections.main-page.name",
+  "tag": "section"
+}
+{% endschema %}

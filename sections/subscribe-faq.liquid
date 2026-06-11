@@ -1,0 +1,344 @@
+{%- style -%}
+  .sfaq-section-{{ section.id }} {
+    background-color: {{ section.settings.section_bg_color }};
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+
+  .sfaq-main-heading {
+    font-family: "Core Rhino 85 Black", sans-serif;
+    font-size: 44px;
+    font-weight: 900;
+    color: {{ section.settings.text_color }};
+    margin: 0 0 32px 0;
+    line-height: 1.15;
+    letter-spacing: -0.5px;
+    text-align: center;
+  }
+
+  /* Tab buttons row */
+  .sfaq-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 36px;
+  }
+
+  .sfaq-tab-btn {
+    padding: 10px 22px;
+    border-radius: 999px;
+    border: 2px solid {{ section.settings.tab_active_color }};
+    background: transparent;
+    color: {{ section.settings.text_color }};
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    white-space: nowrap;
+    font-family: inherit;
+    letter-spacing: 0.2px;
+  }
+
+  .sfaq-tab-btn:hover {
+    background-color: {{ section.settings.tab_active_color }}33;
+  }
+
+  .sfaq-tab-btn.is-active {
+    background-color: {{ section.settings.tab_active_color }};
+    color: #ffffff;
+  }
+
+  /* Tab panels */
+  .sfaq-panel {
+    display: none;
+  }
+
+  .sfaq-panel.is-active {
+    display: block;
+  }
+
+  /* Accordion items */
+  .sfaq-item {
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    transition: background-color 0.3s ease;
+    border-radius: 0;
+  }
+
+  .sfaq-item:first-child {
+    border-top: 1px solid rgba(0,0,0,0.1);
+  }
+
+  .sfaq-trigger {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 15px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+  }
+
+  .sfaq-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: {{ section.settings.text_color }};
+    margin: 0;
+    line-height: 1.4;
+  }
+
+  .sfaq-icon {
+    font-size: 22px;
+    color: {{ section.settings.text_color }};
+    margin-left: 20px;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .sfaq-answer-panel {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+    padding: 0 15px;
+  }
+
+  .sfaq-answer-content {
+    font-size: 14px;
+    line-height: 1.7;
+    color: {{ section.settings.text_color }};
+    opacity: 0.85;
+    padding-bottom: 20px;
+  }
+
+  .sfaq-item.is-open {
+    background-color: {{ section.settings.active_bg_color }};
+    border-bottom-color: transparent;
+    border-radius: 12px;
+    margin-bottom: 4px;
+  }
+
+  /* Placeholder (no blocks) */
+  .sfaq-placeholder {
+    text-align: center;
+    padding: 48px 20px;
+    color: #aaa;
+    font-size: 15px;
+    border: 2px dashed #ddd;
+    border-radius: 12px;
+  }
+
+  @media screen and (max-width: 768px) {
+    .sfaq-section-{{ section.id }} {
+      padding-top: {{ section.settings.padding_top | times: 0.6 | round }}px;
+      padding-bottom: {{ section.settings.padding_bottom | times: 0.6 | round }}px;
+    }
+    .sfaq-main-heading { font-size: 30px; }
+    .sfaq-tab-btn { font-size: 13px; padding: 9px 16px; }
+  }
+{%- endstyle -%}
+
+{%- liquid
+  assign tab_blocks = section.blocks | where: "type", "tab_category"
+  assign faq_blocks  = section.blocks | where: "type", "faq_item"
+-%}
+
+<section class="sfaq-section-{{ section.id }}">
+  <div class="page-width">
+
+    {%- if section.settings.main_heading != blank -%}
+      <h2 class="sfaq-main-heading">{{ section.settings.main_heading }}</h2>
+    {%- endif -%}
+
+    {%- if tab_blocks.size > 0 -%}
+
+      {%- comment -%} Tab buttons {%- endcomment -%}
+      <div class="sfaq-tabs" role="tablist" aria-label="FAQ Categories">
+        {%- for tab in tab_blocks -%}
+          {%- assign tab_id = 'sfaq-panel-' | append: section.id | append: '-' | append: forloop.index -%}
+          <button
+            class="sfaq-tab-btn{% if forloop.first %} is-active{% endif %}"
+            role="tab"
+            aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+            aria-controls="{{ tab_id }}"
+            data-tab-target="{{ tab_id }}"
+            {{ tab.shopify_attributes }}
+          >
+            {{ tab.settings.tab_label | default: 'Tab' }}
+          </button>
+        {%- endfor -%}
+      </div>
+
+      {%- comment -%} Tab panels {%- endcomment -%}
+      {%- for tab in tab_blocks -%}
+        {%- assign tab_id = 'sfaq-panel-' | append: section.id | append: '-' | append: forloop.index -%}
+        {%- assign tab_label = tab.settings.tab_label | default: '' -%}
+
+        <div
+          class="sfaq-panel{% if forloop.first %} is-active{% endif %}"
+          id="{{ tab_id }}"
+          role="tabpanel"
+          aria-label="{{ tab_label | escape }}"
+        >
+          {%- assign matched_faqs = faq_blocks | where: "settings.category", tab_label -%}
+
+          {%- if matched_faqs.size > 0 -%}
+            {%- for faq in matched_faqs -%}
+              <div class="sfaq-item" {{ faq.shopify_attributes }}>
+                <button class="sfaq-trigger" aria-expanded="false">
+                  <h3 class="sfaq-title">{{ faq.settings.question }}</h3>
+                  <span class="sfaq-icon" aria-hidden="true">&plus;</span>
+                </button>
+                <div class="sfaq-answer-panel">
+                  <div class="sfaq-answer-content">{{ faq.settings.answer }}</div>
+                </div>
+              </div>
+            {%- endfor -%}
+          {%- else -%}
+            <div class="sfaq-placeholder">No FAQ items yet for "{{ tab_label }}". Add FAQ Item blocks and set their Category to match this tab.</div>
+          {%- endif -%}
+        </div>
+      {%- endfor -%}
+
+    {%- else -%}
+      <div class="sfaq-placeholder">Add <strong>Tab Category</strong> blocks and <strong>FAQ Item</strong> blocks in the theme editor to get started.</div>
+    {%- endif -%}
+
+  </div>
+</section>
+
+<script>
+(function() {
+  function initSFAQ(sectionEl) {
+    /* --- Tab switching --- */
+    var tabBtns = sectionEl.querySelectorAll('.sfaq-tab-btn');
+    var panels  = sectionEl.querySelectorAll('.sfaq-panel');
+
+    tabBtns.forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var targetId = btn.getAttribute('data-tab-target');
+
+        tabBtns.forEach(function(b) {
+          b.classList.remove('is-active');
+          b.setAttribute('aria-selected', 'false');
+        });
+        panels.forEach(function(p) {
+          p.classList.remove('is-active');
+        });
+
+        btn.classList.add('is-active');
+        btn.setAttribute('aria-selected', 'true');
+        var target = document.getElementById(targetId);
+        if (target) target.classList.add('is-active');
+      });
+    });
+
+    /* --- Accordion inside each panel --- */
+    sectionEl.addEventListener('click', function(e) {
+      var trigger = e.target.closest('.sfaq-trigger');
+      if (!trigger) return;
+
+      var item        = trigger.closest('.sfaq-item');
+      var panel       = item.querySelector('.sfaq-answer-panel');
+      var icon        = item.querySelector('.sfaq-icon');
+      var isOpen      = item.classList.contains('is-open');
+
+      /* Close all siblings in the same panel */
+      var parentPanel = item.closest('.sfaq-panel');
+      if (parentPanel) {
+        parentPanel.querySelectorAll('.sfaq-item.is-open').forEach(function(openItem) {
+          if (openItem !== item) {
+            openItem.classList.remove('is-open');
+            openItem.querySelector('.sfaq-answer-panel').style.maxHeight = null;
+            openItem.querySelector('.sfaq-icon').innerHTML = '&plus;';
+            openItem.querySelector('.sfaq-trigger').setAttribute('aria-expanded', 'false');
+          }
+        });
+      }
+
+      if (isOpen) {
+        item.classList.remove('is-open');
+        panel.style.maxHeight = null;
+        icon.innerHTML = '&plus;';
+        trigger.setAttribute('aria-expanded', 'false');
+      } else {
+        item.classList.add('is-open');
+        panel.style.maxHeight = panel.scrollHeight + 'px';
+        icon.innerHTML = '&minus;';
+        trigger.setAttribute('aria-expanded', 'true');
+      }
+    });
+  }
+
+  function onReady(fn) {
+    if (document.readyState !== 'loading') { fn(); } else { document.addEventListener('DOMContentLoaded', fn); }
+  }
+
+  onReady(function() {
+    document.querySelectorAll('.sfaq-section-{{ section.id }}').forEach(function(sec) {
+      initSFAQ(sec);
+    });
+  });
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Subscribe FAQ (Tabbed)",
+  "settings": [
+    { "type": "header", "content": "Spacing" },
+    { "type": "range", "id": "padding_top",    "min": 0, "max": 150, "step": 5, "unit": "px", "label": "Padding Top",    "default": 60 },
+    { "type": "range", "id": "padding_bottom", "min": 0, "max": 150, "step": 5, "unit": "px", "label": "Padding Bottom", "default": 60 },
+    { "type": "header", "content": "Content" },
+    { "type": "text", "id": "main_heading", "label": "Main Heading", "default": "Frequently Asked Questions" },
+    { "type": "header", "content": "Colours" },
+    { "type": "color", "id": "section_bg_color",  "label": "Section Background", "default": "#f0f8f6" },
+    { "type": "color", "id": "active_bg_color",   "label": "Open Accordion Background", "default": "#edf5f5" },
+    { "type": "color", "id": "text_color",        "label": "Text Colour", "default": "#000000" },
+    { "type": "color", "id": "tab_active_color",  "label": "Active Tab Colour", "default": "#9bccc7" }
+  ],
+  "blocks": [
+    {
+      "type": "tab_category",
+      "name": "Tab Category",
+      "settings": [
+        { "type": "text", "id": "tab_label", "label": "Tab Label", "default": "Category" }
+      ]
+    },
+    {
+      "type": "faq_item",
+      "name": "FAQ Item",
+      "settings": [
+        { "type": "text",     "id": "category", "label": "Category (must match Tab Label exactly)", "default": "Category" },
+        { "type": "text",     "id": "question", "label": "Question", "default": "Your question here?" },
+        { "type": "textarea","id": "answer",   "label": "Answer",   "default": "Your answer here." }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Subscribe FAQ (Tabbed)",
+      "blocks": [
+        { "type": "tab_category", "settings": { "tab_label": "Ingredients" } },
+        { "type": "tab_category", "settings": { "tab_label": "Shipping" } },
+        { "type": "tab_category", "settings": { "tab_label": "Allergens" } },
+        { "type": "tab_category", "settings": { "tab_label": "Subscription" } },
+        { "type": "tab_category", "settings": { "tab_label": "Stage Transition" } },
+
+        { "type": "faq_item", "settings": { "category": "Subscription", "question": "How do I start a subscription?", "answer": "Select your product, choose a delivery frequency, and click ‘Subscribe & Save’ on the product page. You’ll need a Sprout account to manage your subscription going forward." } },
+        { "type": "faq_item", "settings": { "category": "Subscription", "question": "Can I skip or pause my subscription?", "answer": "Yes — log in to your account, navigate to your active subscriptions, and choose to skip a delivery or pause entirely. No penalties apply." } },
+        { "type": "faq_item", "settings": { "category": "Subscription", "question": "How much do I save with a subscription?", "answer": "Subscribers save a minimum of 10% off the standard retail price on every order, plus free standard shipping on qualifying orders." } },
+        { "type": "faq_item", "settings": { "category": "Subscription", "question": "Can I change my delivery frequency?", "answer": "You can update your delivery schedule at any time from your customer account — no need to cancel and start over." } },
+        { "type": "faq_item", "settings": { "category": "Subscription", "question": "Is there a cancellation fee?", "answer": "None at all. There are no lock-ins or fees. Cancel before your next order processes and your subscription ends, no questions asked." } },
+
+        { "type": "faq_item", "settings": { "category": "Stage Transition", "question": "When should I transition from Infant Formula to Toddler Drink?", "answer": "Sprout Toddler Drink is designed for little ones from 12 months. When your child is ready to move from infant formula, Sprout Toddler Drink continues the same clean, plant-based nutrition profile they’re used to." } },
+        { "type": "faq_item", "settings": { "category": "Stage Transition", "question": "Can I mix Infant Formula and Toddler Drink during the transition?", "answer": "We recommend transitioning gradually. You can introduce Toddler Drink alongside Infant Formula over a week or two, increasing the proportion of Toddler Drink as your little one adjusts to the taste and texture." } },
+        { "type": "faq_item", "settings": { "category": "Stage Transition", "question": "Will the taste be different when we switch?", "answer": "The Sprout Toddler Drink has a very similar flavour profile to our Infant Formula — both are lightly sweet and rice-based — which makes the transition easier for most little ones." } },
+        { "type": "faq_item", "settings": { "category": "Stage Transition", "question": "What if my toddler refuses the Toddler Drink at first?", "answer": "It’s normal for some children to take a little time adjusting. Try warming it slightly, mixing a small amount into a familiar meal, or gradually blending it with the formula they’re used to. Reach out to us at hello@sproutorganic.com.au for personalised support." } }
+      ]
+    }
+  ]
+}
+{% endschema %}

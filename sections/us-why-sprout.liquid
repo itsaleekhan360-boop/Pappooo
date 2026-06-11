@@ -1,0 +1,504 @@
+{% comment %}
+  Sprout Organic US Landing Page - Why Choose Sprout Section
+  File Path: Sections / us-why-sprout.liquid
+{% endcomment %}
+
+<div class="why-sprout-section-{{ section.id }} why-sprout-wrapper">
+  <div class="why-sprout-container">
+    
+    <div class="why-sprout-header">
+      {% if section.settings.sub_title != blank %}
+        <span class="why-sprout-subtag">{{ section.settings.sub_title | escape }}</span>
+      {% endif %}
+      
+      {% if section.settings.main_heading != blank %}
+        <h2 class="why-sprout-title">{{ section.settings.main_heading | escape }}</h2>
+      {% endif %}
+    </div>
+
+    <div class="why-sprout-grid">
+      
+      <!-- Card 01 -->
+      <div class="why-sprout-card">
+        {% if section.settings.card_1_num != blank %}
+          <div class="why-card-number">{{ section.settings.card_1_num | escape }}</div>
+        {% endif %}
+        {% if section.settings.card_1_title != blank %}
+          <h3 class="why-card-title">{{ section.settings.card_1_title | escape }}</h3>
+        {% endif %}
+        {% if section.settings.card_1_text != blank %}
+          <p class="why-card-desc">{{ section.settings.card_1_text | escape }}</p>
+        {% endif %}
+      </div>
+
+      <!-- Card 02 -->
+      <div class="why-sprout-card">
+        {% if section.settings.card_2_num != blank %}
+          <div class="why-card-number">{{ section.settings.card_2_num | escape }}</div>
+        {% endif %}
+        {% if section.settings.card_2_title != blank %}
+          <h3 class="why-card-title">{{ section.settings.card_2_title | escape }}</h3>
+        {% endif %}
+        {% if section.settings.card_2_text != blank %}
+          <p class="why-card-desc">{{ section.settings.card_2_text | escape }}</p>
+        {% endif %}
+      </div>
+
+      <!-- Card 03 -->
+      <div class="why-sprout-card">
+        {% if section.settings.card_3_num != blank %}
+          <div class="why-card-number">{{ section.settings.card_3_num | escape }}</div>
+        {% endif %}
+        {% if section.settings.card_3_title != blank %}
+          <h3 class="why-card-title">{{ section.settings.card_3_title | escape }}</h3>
+        {% endif %}
+        {% if section.settings.card_3_text != blank %}
+          <p class="why-card-desc">{{ section.settings.card_3_text | escape }}</p>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Dynamic fonts registration matching Sprout branding */
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap');
+
+  .why-sprout-section-{{ section.id }} {
+    width: 100%;
+    box-sizing: border-box;
+    background-color: {{ section.settings.bg_color }};
+    
+    /* Dynamic Spacing values set from Customizer */
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+    padding-left: {{ section.settings.padding_left }}px;
+    padding-right: {{ section.settings.padding_right }}px;
+  }
+
+  .why-sprout-container {
+    max-width: {{ section.settings.max_container_width }}px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .why-sprout-header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+
+  .why-sprout-subtag {
+    font-family: 'Outfit', sans-serif;
+    font-size: {{ section.settings.subtag_font_size }}px;
+    font-weight: 700;
+    color: {{ section.settings.accent_color }};
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    display: block;
+    margin-bottom: 12px;
+  }
+
+  .why-sprout-title {
+    font-family: 'Fredoka', sans-serif;
+    font-size: {{ section.settings.title_font_size_desktop }}px;
+    font-weight: 700;
+    color: {{ section.settings.text_color_main }};
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+
+  .why-sprout-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    width: 100%;
+  }
+
+  .why-sprout-card {
+    background-color: {{ section.settings.card_bg_color }};
+    border-radius: 16px;
+    padding: 40px 32px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid transparent;
+  }
+
+  .why-sprout-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.03);
+    border-color: rgba(121, 173, 156, 0.15);
+  }
+
+  .why-card-number {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 64px;
+    font-weight: 700;
+    line-height: 1;
+    color: {{ section.settings.number_color }};
+    opacity: 0.75;
+    margin-bottom: 20px;
+    letter-spacing: -0.02em;
+  }
+
+  .why-card-title {
+    font-family: 'Fredoka', sans-serif;
+    font-size: {{ section.settings.card_title_font_size }}px;
+    font-weight: 600;
+    color: {{ section.settings.text_color_main }};
+    margin: 0 0 14px 0;
+    line-height: 1.3;
+  }
+
+  .why-card-desc {
+    font-family: 'Outfit', sans-serif;
+    font-size: {{ section.settings.card_desc_font_size }}px;
+    font-weight: 400;
+    line-height: 1.6;
+    color: {{ section.settings.text_color_body }};
+    margin: 0;
+  }
+
+  @media (max-width: 991px) {
+    .why-sprout-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+    .why-sprout-title {
+      font-size: calc({{ section.settings.title_font_size_desktop }}px * 0.85);
+    }
+  }
+
+  @media (max-width: 767px) {
+    .why-sprout-section-{{ section.id }} {
+      padding-top: {{ section.settings.padding_top_mobile }}px;
+      padding-bottom: {{ section.settings.padding_bottom_mobile }}px;
+      padding-left: {{ section.settings.padding_left_mobile }}px;
+      padding-right: {{ section.settings.padding_right_mobile }}px;
+    }
+
+    .why-sprout-grid {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    .why-sprout-header {
+      margin-bottom: 32px;
+    }
+
+    .why-sprout-title {
+      font-size: {{ section.settings.title_font_size_mobile }}px;
+    }
+
+    .why-sprout-card {
+      padding: 30px 24px;
+    }
+
+    .why-card-number {
+      font-size: 54px;
+      margin-bottom: 16px;
+    }
+
+    .why-card-title {
+      font-size: calc({{ section.settings.card_title_font_size }}px * 0.9);
+      margin-bottom: 10px;
+    }
+
+    .why-card-desc {
+      font-size: calc({{ section.settings.card_desc_font_size }}px * 0.95);
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Why Choose Sprout",
+  "class": "shopify-section-why-sprout",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Desktop Section Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Desktop Padding Top",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Desktop Padding Bottom",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_left",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Desktop Padding Left",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "padding_right",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Desktop Padding Right",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Mobile Section Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Mobile Padding Top",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Mobile Padding Bottom",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "padding_left_mobile",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Mobile Padding Left",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "padding_right_mobile",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Mobile Padding Right",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "max_container_width",
+      "min": 800,
+      "max": 1400,
+      "step": 50,
+      "unit": "px",
+      "label": "Max Container Grid Width",
+      "default": 1200
+    },
+    {
+      "type": "header",
+      "content": "Branding Colors"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Section Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "card_bg_color",
+      "label": "Card Background",
+      "default": "#eaf2ee"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Subtag Green Accent",
+      "default": "#79ad9c"
+    },
+    {
+      "type": "color",
+      "id": "number_color",
+      "label": "Card Large Numbers Color",
+      "default": "#9dc1b5"
+    },
+    {
+      "type": "color",
+      "id": "text_color_main",
+      "label": "Headings Text Color",
+      "default": "#1c2b24"
+    },
+    {
+      "type": "color",
+      "id": "text_color_body",
+      "label": "Paragraph Body Text Color",
+      "default": "#4a5d53"
+    },
+    {
+      "type": "header",
+      "content": "Typography / Font Sizes"
+    },
+    {
+      "type": "range",
+      "id": "subtag_font_size",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Section Subtag Font Size",
+      "default": 13
+    },
+    {
+      "type": "range",
+      "id": "title_font_size_desktop",
+      "min": 24,
+      "max": 64,
+      "step": 2,
+      "unit": "px",
+      "label": "Desktop Title Font Size",
+      "default": 38
+    },
+    {
+      "type": "range",
+      "id": "title_font_size_mobile",
+      "min": 18,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "label": "Mobile Title Font Size",
+      "default": 28
+    },
+    {
+      "type": "range",
+      "id": "card_title_font_size",
+      "min": 16,
+      "max": 36,
+      "step": 1,
+      "unit": "px",
+      "label": "Card Headline Font Size",
+      "default": 22
+    },
+    {
+      "type": "range",
+      "id": "card_desc_font_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Card Body Text Font Size",
+      "default": 15
+    },
+    {
+      "type": "header",
+      "content": "Heading Texts"
+    },
+    {
+      "type": "text",
+      "id": "sub_title",
+      "label": "Section Subtag Label",
+      "default": "WHY SPROUT"
+    },
+    {
+      "type": "text",
+      "id": "main_heading",
+      "label": "Section Main Title",
+      "default": "Why Parents Choose Sprout"
+    },
+    {
+      "type": "header",
+      "content": "Card 1: Content Setup"
+    },
+    {
+      "type": "text",
+      "id": "card_1_num",
+      "label": "Card 1 Number Index",
+      "default": "01"
+    },
+    {
+      "type": "text",
+      "id": "card_1_title",
+      "label": "Card 1 Headline",
+      "default": "Certified Organic"
+    },
+    {
+      "type": "textarea",
+      "id": "card_1_text",
+      "label": "Card 1 Paragraph Content",
+      "default": "Every Sprout product is made from certified organic ingredients, with the same standards we hold ourselves to in Australia."
+    },
+    {
+      "type": "header",
+      "content": "Card 2: Content Setup"
+    },
+    {
+      "type": "text",
+      "id": "card_2_num",
+      "label": "Card 2 Number Index",
+      "default": "02"
+    },
+    {
+      "type": "text",
+      "id": "card_2_title",
+      "label": "Card 2 Headline",
+      "default": "Plant-Based By Design"
+    },
+    {
+      "type": "textarea",
+      "id": "card_2_text",
+      "label": "Card 2 Paragraph Content",
+      "default": "A complete nutrition profile, naturally allergen-friendly and free from dairy, soy and common irritants."
+    },
+    {
+      "type": "header",
+      "content": "Card 3: Content Setup"
+    },
+    {
+      "type": "text",
+      "id": "card_3_num",
+      "label": "Card 3 Number Index",
+      "default": "03"
+    },
+    {
+      "type": "text",
+      "id": "card_3_title",
+      "label": "Card 3 Headline",
+      "default": "Loved By 49,000+ Parents"
+    },
+    {
+      "type": "textarea",
+      "id": "card_3_text",
+      "label": "Card 3 Paragraph Content",
+      "default": "4.7 stars across more than 300 verified reviews — from Australian parents who chose Sprout for what they put in their little one's bottle."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Why Choose Sprout Grid",
+      "category": "Brand Information"
+    }
+  ]
+}
+{% endschema %}

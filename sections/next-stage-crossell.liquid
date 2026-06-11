@@ -1,0 +1,406 @@
+{% comment %} Task 11 & 13 — Dynamic Next Stage Cross-sell Section {% endcomment %}
+
+<section class="next-stage-section section-{{ section.id }}" style="background-color: {{ section.settings.bg_color }};">
+  <div class="next-stage-inner inner-{{ section.id }}">
+
+    <!-- Left: Text Content -->
+    <div class="next-stage-text">
+      <h2 class="next-stage-heading text-heading-{{ section.id }}" style="color: {{ section.settings.text_color }};">{{ section.settings.heading }}</h2>
+      <p class="next-stage-body text-body-{{ section.id }}" style="color: {{ section.settings.text_color }}ee;">{{ section.settings.body_text }}</p>
+      
+      <!-- Condition removed: Link selection option is active in schema, but button stays visible on front-end -->
+      <a href="{{ section.settings.button_url | default: '#' }}" class="next-stage-btn btn-{{ section.id }}">
+        {{ section.settings.button_label }}
+      </a>
+    </div>
+
+    <!-- Right: Image -->
+    <div class="next-stage-image image-wrap-{{ section.id }}">
+      {% if section.settings.image != blank %}
+        <img
+          src="{{ section.settings.image | img_url: '800x600', crop: 'center' }}"
+          alt="{{ section.settings.heading }}"
+          loading="lazy"
+        >
+      {% else %}
+        <div class="next-stage-image__placeholder">
+          {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+        </div>
+      {% endif %}
+    </div>
+
+  </div>
+</section>
+
+<style>
+/* Dynamic Layout & Padding Adjustments via Schema Settings */
+.section-{{ section.id }} {
+  width: 100%;
+  padding-top: {{ section.settings.padding_top }}px;
+  padding-bottom: {{ section.settings.padding_bottom }}px;
+  padding-left: {{ section.settings.padding_left }}px;
+  padding-right: {{ section.settings.padding_right }}px;
+  box-sizing: border-box;
+}
+
+.inner-{{ section.id }} {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 48px;
+}
+
+.next-stage-text {
+  flex: 1.2;
+}
+
+/* Dynamic Typography */
+.text-heading-{{ section.id }} {
+  font-size: {{ section.settings.heading_size }}px;
+  font-weight: 700;
+  margin: 0 0 16px 0;
+  line-height: 1.2;
+}
+
+.text-body-{{ section.id }} {
+  font-size: {{ section.settings.body_size }}px;
+  margin: 0 0 28px 0;
+  line-height: 1.6;
+  max-width: 480px;
+}
+
+/* Dynamic Button Controls */
+.btn-{{ section.id }} {
+  display: inline-block;
+  padding: 14px 32px;
+  background: {{ section.settings.btn_bg_color }};
+  color: {{ section.settings.btn_text_color }};
+  border: 1px solid {{ section.settings.btn_bg_color }};
+  border-radius: {{ section.settings.btn_radius }}px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.btn-{{ section.id }}:hover {
+  background: transparent;
+  color: {{ section.settings.btn_bg_color }};
+  border-color: {{ section.settings.btn_bg_color }};
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+}
+
+.next-stage-image {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Dynamic Image Controls */
+.image-wrap-{{ section.id }} img,
+.image-wrap-{{ section.id }} .next-stage-image__placeholder {
+  width: 100%;
+  max-width: {{ section.settings.image_max_width }}px;
+  height: {{ section.settings.image_height }}px;
+  object-fit: cover;
+  border-radius: {{ section.settings.image_radius }}px;
+  display: block;
+}
+
+.image-wrap-{{ section.id }} .next-stage-image__placeholder {
+  background: rgba(255,255,255,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-wrap-{{ section.id }} .placeholder-svg {
+  width: 80px;
+  height: 80px;
+  fill: rgba(255,255,255,0.4);
+}
+
+/* Mobile Configurations */
+@media (max-width: 768px) {
+  .section-{{ section.id }} {
+    padding-top: {{ section.settings.mobile_padding_top }}px;
+    padding-bottom: {{ section.settings.mobile_padding_bottom }}px;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .inner-{{ section.id }} {
+    flex-direction: column-reverse;
+    gap: 32px;
+  }
+
+  .text-heading-{{ section.id }} {
+    font-size: {{ section.settings.mobile_heading_size }}px;
+    text-align: center;
+  }
+
+  .text-body-{{ section.id }} {
+    font-size: {{ section.settings.mobile_body_size }}px;
+    text-align: center;
+    max-width: 100%;
+  }
+
+  .next-stage-text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .image-wrap-{{ section.id }} img,
+  .image-wrap-{{ section.id }} .next-stage-image__placeholder {
+    height: {{ section.settings.mobile_image_height }}px;
+    max-width: 100%;
+  }
+}
+</style>
+
+{% schema %}
+{
+  "name": "Next Stage Cross-sell",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content Settings"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "The next stage"
+    },
+    {
+      "type": "textarea",
+      "id": "body_text",
+      "label": "Body Text",
+      "default": "[CLIENT TO WRITE — short line introducing the Toddler Drink as the natural next step]"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button Text",
+      "default": "See the Toddler Drink"
+    },
+    {
+      "type": "url",
+      "id": "button_url",
+      "label": "Button URL"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Section Image"
+    },
+    {
+      "type": "header",
+      "content": "Typography (Font Sizes)"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "min": 20,
+      "max": 60,
+      "step": 1,
+      "unit": "px",
+      "label": "Heading Font Size (Desktop)",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "mobile_heading_size",
+      "min": 18,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "label": "Heading Font Size (Mobile)",
+      "default": 28
+    },
+    {
+      "type": "range",
+      "id": "body_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Body Font Size (Desktop)",
+      "default": 15
+    },
+    {
+      "type": "range",
+      "id": "mobile_body_size",
+      "min": 11,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Body Font Size (Mobile)",
+      "default": 14
+    },
+    {
+      "type": "header",
+      "content": "Image Dimensions"
+    },
+    {
+      "type": "range",
+      "id": "image_max_width",
+      "min": 300,
+      "max": 700,
+      "step": 10,
+      "unit": "px",
+      "label": "Image Max Width",
+      "default": 520
+    },
+    {
+      "type": "range",
+      "id": "image_height",
+      "min": 200,
+      "max": 600,
+      "step": 10,
+      "unit": "px",
+      "label": "Image Height (Desktop)",
+      "default": 380
+    },
+    {
+      "type": "range",
+      "id": "mobile_image_height",
+      "min": 150,
+      "max": 400,
+      "step": 10,
+      "unit": "px",
+      "label": "Image Height (Mobile)",
+      "default": 280
+    },
+    {
+      "type": "header",
+      "content": "Desktop Paddings"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 120,
+      "step": 5,
+      "unit": "px",
+      "label": "Padding Top",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 120,
+      "step": 5,
+      "unit": "px",
+      "label": "Padding Bottom",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_left",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Padding Left",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_right",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Padding Right",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Mobile Paddings"
+    },
+    {
+      "type": "range",
+      "id": "mobile_padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Mobile Padding Top",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "mobile_padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Mobile Padding Bottom",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Styling & Corner Radii"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background Color",
+      "default": "#5bbfbf"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "btn_bg_color",
+      "label": "Button Background Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "btn_text_color",
+      "label": "Button Text Color",
+      "default": "#5bbfbf"
+    },
+    {
+      "type": "range",
+      "id": "image_radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Image Border Radius",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "btn_radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Button Border Radius",
+      "default": 30
+    }
+  ],
+  "presets": [
+    {
+      "name": "Next Stage Cross-sell"
+    }
+  ]
+}
+{% endschema %}

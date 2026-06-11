@@ -1,0 +1,564 @@
+{% comment %}
+  TC Scan Verification — Shopify Section
+  Renders the Trust Codes verification result for a scanned QR code.
+  Status badge is driven by the standard TC notice.* protocol fields.
+
+  Production date field is intentionally NOT rendered.
+{% endcomment %}
+
+{{ 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700&display=swap' | stylesheet_tag }}
+
+<style>
+  .sprout-scan * { box-sizing: border-box; margin: 0; padding: 0; }
+  .sprout-scan {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: #535353;
+    max-width: 100%;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  .sprout-content { max-width: 1100px; margin: 0 auto; padding: 40px 24px; }
+  .sprout-hero { display: flex; flex-direction: column; align-items: center; gap: 24px; }
+  @media (min-width: 768px) { .sprout-hero { flex-direction: row; align-items: center; gap: 56px; } }
+  .sprout-image-wrap { flex-shrink: 0; display: flex; justify-content: center; width: 100%; }
+  @media (min-width: 768px) { .sprout-image-wrap { flex: 0 0 45%; } }
+  .sprout-image-wrap img { max-width: 360px; width: 100%; height: auto; display: block; }
+  @media (min-width: 768px) { .sprout-image-wrap img { max-width: 100%; } }
+  .sprout-info { flex: 1; width: 100%; text-align: center; max-width: 520px; }
+  .sprout-product-name { font-size: 24px; font-weight: 800; line-height: 1.25; margin-bottom: 4px; color: #535353; }
+  @media (min-width: 768px) { .sprout-product-name { font-size: 28px; } }
+  .sprout-product-sub { font-size: 14px; color: #888; margin-bottom: 18px; }
+  .sprout-badge {
+    background: #e7f3f1;
+    border-radius: 14px;
+    padding: 18px 22px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 18px;
+    text-align: left;
+  }
+  .sprout-badge-icon { width: 44px; height: 44px; flex-shrink: 0; }
+  .sprout-badge-icon svg { width: 44px; height: 44px; }
+  .sprout-badge-title { font-size: 19px; font-weight: 700; color: #9bccc7; }
+  .sprout-badge-text { font-size: 13px; color: #555; margin-top: 2px; line-height: 1.4; }
+  .sprout-badge-caution { background: #fff8e1; }
+  .sprout-badge-caution .sprout-badge-title { color: #f5a623; }
+  .sprout-badge-warning { background: #fce4ec; }
+  .sprout-badge-warning .sprout-badge-title { color: #d32f2f; }
+  .sprout-badge-recall { background: #d32f2f; }
+  .sprout-badge-recall .sprout-badge-title { color: #fff; }
+  .sprout-badge-recall .sprout-badge-text { color: #ffcdd2; }
+  .sprout-meta-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 26px; text-align: left; }
+  .sprout-meta-label { font-size: 11px; color: #999; letter-spacing: 0.2px; margin-bottom: 2px; }
+  .sprout-meta-value { font-size: 14px; font-weight: 700; color: #535353; }
+  .sprout-meta-right { text-align: right; }
+  .sprout-section-title { font-size: 18px; font-weight: 800; margin-bottom: 14px; text-align: left; color: #535353; }
+  .sprout-details-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 22px; }
+  @media (min-width: 480px) { .sprout-details-grid { grid-template-columns: 1fr 1fr; } }
+  .sprout-detail-card {
+    display: flex; align-items: center; gap: 12px;
+    border: 1.5px solid #e5e7e5; border-radius: 12px;
+    padding: 12px 14px; text-align: left;
+  }
+  .sprout-detail-icon {
+    width: 36px; height: 36px;
+    background: var(--sprout-accent, #9bccc7);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .sprout-detail-icon svg { width: 20px; height: 20px; }
+  .sprout-detail-label { font-size: 11px; color: #999; }
+  .sprout-detail-value { font-size: 14px; font-weight: 700; color: #535353; word-break: break-word; }
+  .sprout-detail-value.is-expired { color: #d32f2f; }
+
+  /* COA button — solid teal brand colour, no animation. */
+  .sprout-coa-wrap { text-align: center; margin: 14px 0 0; }
+  .sprout-coa-btn {
+    display: inline-block;
+    background: var(--sprout-accent, #9bccc7);
+    color: #fff;
+    border: 0;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    padding: 12px 32px;
+    border-radius: 30px;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .sprout-coa-btn:hover,
+  .sprout-coa-btn:focus {
+    background: var(--sprout-accent, #9bccc7);
+    color: #fff;
+    text-decoration: none;
+    outline: 0;
+  }
+
+  .sprout-loading { text-align: center; padding: 80px 20px; }
+  .sprout-spinner {
+    width: 44px; height: 44px;
+    border: 4px solid #e8f5e9;
+    border-top-color: var(--sprout-accent, #9bccc7);
+    border-radius: 50%;
+    animation: sprout-spin 0.7s linear infinite;
+    margin: 0 auto 16px;
+  }
+  @keyframes sprout-spin { to { transform: rotate(360deg); } }
+  .sprout-loading-text { color: #999; font-size: 14px; }
+  /* "Learn More about Your Tin" empty state — styled as a rounded info box. */
+  .sprout-error {
+    text-align: center;
+    margin: 40px auto;
+    max-width: 560px;
+    padding: 40px 32px;
+    background: #e7f3f1;
+    border-radius: 18px;
+    color: #535353;
+  }
+  .sprout-error h2 {
+    font-size: 22px;
+    margin-bottom: 14px;
+    color: #535353;
+    font-weight: 800;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .sprout-error p {
+    color: #535353;
+    font-size: 15px;
+    max-width: 480px;
+    margin: 0 auto;
+    line-height: 1.55;
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 400;
+  }
+  @media (max-width: 480px) {
+    .sprout-error { margin: 20px 16px; padding: 28px 22px; }
+    .sprout-error h2 { font-size: 19px; }
+    .sprout-error p { font-size: 14px; }
+  }
+  .sprout-notice { padding: 12px 16px; border-radius: 8px; font-size: 13px; margin-bottom: 8px; text-align: left; }
+  .sprout-notice-warn { background: #fff3cd; border: 1px solid #ffc107; color: #6b4e00; }
+  .sprout-notice-danger { background: #fce4ec; border: 1px solid #ef9a9a; color: #8a1f1f; }
+  .sprout-hidden { display: none; }
+</style>
+
+<div class="sprout-scan" style="--sprout-accent: {{ section.settings.accent_color }};">
+  <div class="sprout-content">
+    <div class="sprout-loading" id="sprout-loading">
+      <div class="sprout-spinner"></div>
+      <div class="sprout-loading-text">Verifying product...</div>
+    </div>
+    <div id="sprout-result" class="sprout-hidden"></div>
+    <div id="sprout-error" class="sprout-hidden sprout-error">
+      <h2>Learn More about Your Tin</h2>
+      <p>Scan the QR code at the base of your Infant Formula or Toddler Drink tin for product details.</p>
+    </div>
+  </div>
+</div>
+
+<script id="sprout-config" type="application/json">
+{
+  "apiBase": {{ section.settings.api_base | json }},
+  "brandName": {{ section.settings.brand_name | json }},
+  "verifiedBy": {{ section.settings.verified_by | json }},
+  "accentColor": {{ section.settings.accent_color | json }},
+  "coaBaseUrl":         {{ section.settings.coa_base_url         | json }},
+  "coaProductMappings": {{ section.settings.coa_product_mappings | json }}
+}
+</script>
+
+<script>
+(function() {
+  'use strict';
+
+  var CONFIG = JSON.parse(document.getElementById('sprout-config').textContent);
+
+  if (!/^https:\/\//i.test(CONFIG.apiBase)) {
+    console.error('[tc-scan] API base must use https://');
+    document.getElementById('sprout-loading').classList.add('sprout-hidden');
+    var e = document.getElementById('sprout-error');
+    e.querySelector('p').textContent = 'Configuration error.';
+    e.classList.remove('sprout-hidden');
+    return;
+  }
+
+  var ICONS = {
+    shield:   '<svg viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="22" fill="' + CONFIG.accentColor + '" opacity="0.18"/><path d="M24 9l11 4v9c0 7-5 12.5-11 14-6-1.5-11-7-11-14v-9l11-4z" fill="' + CONFIG.accentColor + '" opacity="0.35"/><path d="M19 24l3.5 3.5L30 20" stroke="' + CONFIG.accentColor + '" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>',
+    qrcode:   '<svg viewBox="0 0 24 24" fill="white"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="3" height="3"/><rect x="18" y="18" width="3" height="3"/><rect x="14" y="18" width="3" height="3"/><rect x="18" y="14" width="3" height="3"/></svg>',
+    batch:    '<svg viewBox="0 0 24 24" fill="none"><rect x="4" y="3" width="16" height="18" rx="2" stroke="white" stroke-width="2"/><line x1="8" y1="8" x2="16" y2="8" stroke="white" stroke-width="2"/><line x1="8" y1="12" x2="14" y2="12" stroke="white" stroke-width="2"/><line x1="8" y1="16" x2="12" y2="16" stroke="white" stroke-width="2"/></svg>',
+    calendar: '<svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="17" rx="2" stroke="white" stroke-width="2"/><line x1="3" y1="9" x2="21" y2="9" stroke="white" stroke-width="2"/><line x1="8" y1="2" x2="8" y2="6" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="16" y1="2" x2="16" y2="6" stroke="white" stroke-width="2" stroke-linecap="round"/><rect x="7" y="12" width="4" height="3" rx="0.5" fill="white"/></svg>',
+    clock:    '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="white" stroke-width="2"/><polyline points="12,7 12,12 15,15" stroke="white" stroke-width="2" stroke-linecap="round" fill="none"/></svg>',
+    warning:  '<svg viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="22" fill="#f5a623" opacity="0.15"/><path d="M24 14v12" stroke="#f5a623" stroke-width="3" stroke-linecap="round"/><circle cx="24" cy="32" r="2" fill="#f5a623"/></svg>',
+    danger:   '<svg viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="22" fill="#d32f2f" opacity="0.15"/><path d="M18 18l12 12M30 18L18 30" stroke="#d32f2f" stroke-width="3" stroke-linecap="round"/></svg>'
+  };
+
+  var CODE_RE = /^[a-zA-Z0-9]{8}$/;
+
+  function getCodeFromURL() {
+    var segments = window.location.pathname.split('/').filter(function(s){ return s.length > 0; });
+    if (segments.length) {
+      var last = segments[segments.length - 1];
+      if (last.length >= 8) {
+        var tail = last.slice(-8);
+        if (CODE_RE.test(tail)) return tail;
+      }
+    }
+    var params = new URLSearchParams(window.location.search);
+    var q = params.get('code') || params.get('c') || params.get('qr_id');
+    if (q && q.length >= 8) {
+      var qTail = q.slice(-8);
+      if (CODE_RE.test(qTail)) return qTail;
+    }
+    if (window.location.hash && window.location.hash.length > 1) {
+      var h = window.location.hash.substring(1);
+      if (h.length >= 8) {
+        var hTail = h.slice(-8);
+        if (CODE_RE.test(hTail)) return hTail;
+      }
+    }
+    return null;
+  }
+
+  function esc(str) {
+    if (str == null) return '';
+    var d = document.createElement('div');
+    d.textContent = String(str);
+    return d.innerHTML;
+  }
+
+  function safeUrl(url) {
+    if (!url || typeof url !== 'string') return '';
+    var s = url.trim();
+    if (/^https?:\/\//i.test(s)) return s;
+    return '';
+  }
+
+  function fmtDateLong(dateStr) {
+    if (!dateStr) return '';
+    var d = new Date(dateStr);
+    if (isNaN(d.getTime())) return '';
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return ('0'+d.getDate()).slice(-2) + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+  }
+
+  function fmtDateScan(dateStr) {
+    if (!dateStr) return '';
+    var d = new Date(dateStr);
+    if (isNaN(d.getTime())) return '';
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return months[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+  }
+
+  function isPastDate(dateStr) {
+    if (!dateStr) return false;
+    var d = new Date(dateStr);
+    if (isNaN(d.getTime())) return false;
+    return d.getTime() < Date.now();
+  }
+
+  // -- COA URL resolver -------------------------------------------------------
+  // Builds the batch-specific COA URL using the same naming convention as
+  // the field-to-formula page:
+  //   {coaBaseUrl}{prefix}-{batchNumber}.pdf
+  // The prefix is selected by matching the scanned product's name against
+  // the keyword|prefix mapping list in section settings.
+  // An explicit URL on the API response still wins, if present.
+  function parseProductMappings(raw) {
+    if (!raw) return [];
+    var out = [];
+    String(raw).split(/\r?\n/).forEach(function(line) {
+      var parts = line.split('|');
+      if (parts.length < 2) return;
+      var keyword = parts[0].trim().toLowerCase();
+      var prefix  = parts.slice(1).join('|').trim();
+      if (keyword && prefix) out.push({ keyword: keyword, prefix: prefix });
+    });
+    return out;
+  }
+
+  function sanitizeBatch(b) {
+    if (!b) return '';
+    return String(b)
+      .replace(/\s+/g, '_')
+      .replace(/[^A-Za-z0-9._-]/g, '');
+  }
+
+  function resolveCOA(product, batch) {
+    var fromApi =
+      (batch && batch.presetData && batch.presetData.certificateCOA) ||
+      (product && product.data && product.data.coa_url) ||
+      (product && product.preset_data && product.preset_data.coa_url);
+    var apiUrl = safeUrl(fromApi);
+    if (apiUrl) return apiUrl;
+
+    var base = safeUrl(CONFIG.coaBaseUrl);
+    if (!base) return '';
+    if (base.charAt(base.length - 1) !== '/') base += '/';
+    var batchSafe = sanitizeBatch(batch && batch.number);
+    if (!batchSafe) return '';
+    var name = ((product && product.name) || '').toLowerCase();
+    var mappings = parseProductMappings(CONFIG.coaProductMappings);
+    var prefix = '';
+    for (var i = 0; i < mappings.length; i++) {
+      if (name.indexOf(mappings[i].keyword) !== -1) {
+        prefix = mappings[i].prefix;
+        break;
+      }
+    }
+    if (!prefix) return '';
+    return base + encodeURIComponent(prefix + '-' + batchSafe) + '.pdf';
+  }
+  // ---------------------------------------------------------------------------
+
+  // -- Status decision --------------------------------------------------------
+  function determineStatus(data) {
+    var notice = data.notice || {};
+    var item = data.item || {};
+    var batch = data.batch || {};
+
+    if (notice.recalled || item.status === 'recall') return 'recalled';
+    if (notice.copied) return 'copied';
+    if (notice.deactivated || item.status === 'deactivated') return 'deactivated';
+    if (notice.expired || isPastDate(batch.dateExpiration)) return 'expired';
+    if (notice.scansExceeded) return 'unusual_scans';
+    if (notice.grey || batch.greyNotification) return 'grey';
+    if (notice.valid === false) return 'invalid';
+    return 'authentic';
+  }
+
+  function badgeFor(status) {
+    var safeBrand = esc(CONFIG.brandName);
+    switch (status) {
+      case 'recalled':
+        return { cls: ' sprout-badge-recall', icon: ICONS.danger,
+                 title: 'Product Recalled',
+                 text: 'This product has been recalled. Please stop using it and contact the manufacturer.' };
+      case 'copied':
+        return { cls: ' sprout-badge-warning', icon: ICONS.danger,
+                 title: 'Possible Counterfeit',
+                 text: 'This code may have been copied. Please verify with <strong>' + safeBrand + '</strong> before use.' };
+      case 'deactivated':
+        return { cls: ' sprout-badge-warning', icon: ICONS.danger,
+                 title: 'Code Deactivated',
+                 text: 'This code is no longer active.' };
+      case 'expired':
+        return { cls: ' sprout-badge-caution', icon: ICONS.warning,
+                 title: 'Past Use-By Date',
+                 text: 'This product has passed its use-by date. Please discard.' };
+      case 'unusual_scans':
+        return { cls: ' sprout-badge-caution', icon: ICONS.warning,
+                 title: 'Unusual Scan Behaviour',
+                 text: 'This code has been scanned an unusual number of times. If you bought from an unauthorised seller, please verify with <strong>' + safeBrand + '</strong>.' };
+      case 'grey':
+        return { cls: ' sprout-badge-caution', icon: ICONS.warning,
+                 title: 'Possibly Unauthorised Channel',
+                 text: 'This product may have been sold through an unauthorised channel.' };
+      case 'invalid':
+        return { cls: ' sprout-badge-warning', icon: ICONS.danger,
+                 title: 'Cannot Verify',
+                 text: 'This product could not be fully verified.' };
+      default:
+        return { cls: '', icon: ICONS.shield,
+                 title: 'Authentic Product',
+                 text: 'This product has been verified as genuine <strong>' + safeBrand + '</strong>.' };
+    }
+  }
+  // ---------------------------------------------------------------------------
+
+  function scanCode(code) {
+    var xhr = new XMLHttpRequest();
+    var base = CONFIG.apiBase.replace(/\/+$/, '');
+    xhr.open('GET', base + '/scans/scan/' + encodeURIComponent(code) + '/', true);
+    xhr.setRequestHeader('Accept', 'application/json');
+    xhr.timeout = 15000;
+    xhr.onload = function() {
+      hide('sprout-loading');
+      if (xhr.status === 200) {
+        try { renderResult(JSON.parse(xhr.responseText)); }
+        catch(e) { showError('Invalid response.'); }
+      } else if (xhr.status === 404) {
+        showError('This code was not found in our system.');
+      } else {
+        showError('Unable to verify. Please try again.');
+      }
+    };
+    xhr.onerror   = function() { hide('sprout-loading'); showError('Network error. Please check your connection.'); };
+    xhr.ontimeout = function() { hide('sprout-loading'); showError('Request timed out. Please try again.'); };
+    xhr.send();
+  }
+
+  function renderResult(data) {
+    var item    = data.item    || {};
+    var product = data.product || {};
+    var batch   = data.batch   || {};
+    var notice  = data.notice  || {};
+    var view    = data.view    || {};
+
+    var status = determineStatus(data);
+    var badge  = badgeFor(status);
+
+    var productName = product.name || 'Unknown Product';
+    var nameParts = productName.match(/^(.+?)(\s+\d+-\d+\s+months?.*)$/i);
+    var mainName = nameParts ? nameParts[1] : productName;
+    var subName  = nameParts ? nameParts[2].trim() : '';
+
+    var html = '<div class="sprout-hero">';
+
+    var imgUrl = safeUrl(product.infoImage);
+    if (imgUrl) {
+      html += '<div class="sprout-image-wrap"><img src="' + esc(imgUrl) + '" alt="' + esc(productName) + '" loading="lazy" referrerpolicy="no-referrer"></div>';
+    }
+
+    html += '<div class="sprout-info">';
+    html += '<div class="sprout-product-name">' + esc(mainName) + '</div>';
+    if (subName) html += '<div class="sprout-product-sub">' + esc(subName) + '</div>';
+
+    html += '<div class="sprout-badge' + badge.cls + '">';
+    html += '<div class="sprout-badge-icon">' + badge.icon + '</div>';
+    html += '<div><div class="sprout-badge-title">' + esc(badge.title) + '</div>';
+    html += '<div class="sprout-badge-text">' + badge.text + '</div></div></div>';
+
+    if (notice.recalled && status !== 'recalled') {
+      html += '<div class="sprout-notice sprout-notice-danger">This product has been recalled. Please discontinue use immediately.</div>';
+    }
+    if (notice.copied && status !== 'copied') {
+      html += '<div class="sprout-notice sprout-notice-danger">This code has been flagged as potentially copied.</div>';
+    }
+    if (notice.scansExceeded && status !== 'unusual_scans') {
+      html += '<div class="sprout-notice sprout-notice-warn">This code has been scanned an unusual number of times.</div>';
+    }
+    if ((notice.expired || isPastDate(batch.dateExpiration)) && status !== 'expired') {
+      html += '<div class="sprout-notice sprout-notice-warn">This product has passed its use-by date.</div>';
+    }
+    if ((notice.grey || batch.greyNotification) && status !== 'grey') {
+      html += '<div class="sprout-notice sprout-notice-warn">This product may be from an unauthorised channel.</div>';
+    }
+
+    var scanDate = fmtDateScan(view.created || new Date().toISOString());
+    html += '<div class="sprout-meta-row">';
+    html += '<div><div class="sprout-meta-label">Verified by</div><div class="sprout-meta-value">' + esc(CONFIG.verifiedBy) + '</div></div>';
+    html += '<div class="sprout-meta-right"><div class="sprout-meta-label">Scan Date</div><div class="sprout-meta-value">' + esc(scanDate) + '</div></div>';
+    html += '</div>';
+
+    html += '<div class="sprout-section-title">Product Details</div>';
+    html += '<div class="sprout-details-grid">';
+    if (item.qrId) html += detailCard(ICONS.qrcode, 'Product Code', item.qrId);
+    if (batch.number) html += detailCard(ICONS.batch, 'Batch Number', batch.number);
+
+    if (batch.dateExpiration || batch.dateExpirationFriendly) {
+      var expDisplay = batch.dateExpirationFriendly || fmtDateLong(batch.dateExpiration);
+      var expired = isPastDate(batch.dateExpiration) || notice.expired;
+      html += detailCard(ICONS.calendar, 'Use by Date', expDisplay, expired);
+    }
+    if (batch.dateManufacturing || batch.dateManufacturingFriendly) {
+      html += detailCard(ICONS.clock, 'MFD',
+        batch.dateManufacturingFriendly || fmtDateLong(batch.dateManufacturing));
+    }
+    html += '</div>';
+
+    var coaUrl = resolveCOA(product, batch);
+    if (coaUrl) {
+      html += '<div class="sprout-coa-wrap"><a id="sprout-coa-btn" href="' + esc(coaUrl) + '" target="_blank" rel="noopener noreferrer" class="sprout-coa-btn" style="display:none;">View COA</a></div>';
+    }
+
+    html += '</div></div>';
+
+    var el = document.getElementById('sprout-result');
+    el.innerHTML = html;
+    el.classList.remove('sprout-hidden');
+
+    if (coaUrl) revealCOAIfExists(coaUrl);
+    refineGPS(data);
+  }
+
+  function revealCOAIfExists(url) {
+    var btn = document.getElementById('sprout-coa-btn');
+    if (!btn) return;
+    if (typeof fetch !== 'function') return;
+    fetch(url, { method: 'HEAD' })
+      .then(function(r) {
+        if (!r || !r.ok) return;
+        var ct = (r.headers.get('content-type') || '').toLowerCase();
+        if (ct.indexOf('pdf') === -1 && ct.indexOf('octet-stream') === -1) return;
+        btn.style.display = '';
+      })
+      .catch(function() { /* network/CORS error → stay hidden */ });
+  }
+
+  function detailCard(icon, label, value, highlightDanger) {
+    var valueClass = 'sprout-detail-value' + (highlightDanger ? ' is-expired' : '');
+    return '<div class="sprout-detail-card"><div class="sprout-detail-icon">' + icon + '</div>' +
+      '<div><div class="sprout-detail-label">' + esc(label) + '</div>' +
+      '<div class="' + valueClass + '">' + esc(value) + '</div></div></div>';
+  }
+
+  function refineGPS(data) {
+    if (!navigator.geolocation || !data.view || !data.view.url || !data.jsontoken) return;
+    var postUrl = safeUrl(data.view.url);
+    if (!postUrl) return;
+
+    function send(body) {
+      var x = new XMLHttpRequest();
+      x.open('POST', postUrl, true);
+      x.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+      x.withCredentials = true;
+      x.send(body);
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      function(pos) {
+        send('jsontoken=' + encodeURIComponent(data.jsontoken) +
+             '&latitude=' + encodeURIComponent(pos.coords.latitude) +
+             '&longitude=' + encodeURIComponent(pos.coords.longitude) +
+             '&tzOffset=' + encodeURIComponent(new Date().getTimezoneOffset()) +
+             '&host=' + encodeURIComponent(window.location.host));
+      },
+      function(err) {
+        send('jsontoken=' + encodeURIComponent(data.jsontoken) +
+             '&data=' + encodeURIComponent('GPS error: ' + err.code) +
+             '&tzOffset=' + encodeURIComponent(new Date().getTimezoneOffset()) +
+             '&host=' + encodeURIComponent(window.location.host));
+      }
+    );
+  }
+
+  function hide(id) { document.getElementById(id).classList.add('sprout-hidden'); }
+  function showError(msg) {
+    var el = document.getElementById('sprout-error');
+    el.querySelector('p').textContent = msg;
+    el.classList.remove('sprout-hidden');
+  }
+
+  var code = getCodeFromURL();
+  if (code) {
+    scanCode(code);
+  } else {
+    hide('sprout-loading');
+    document.getElementById('sprout-error').classList.remove('sprout-hidden');
+  }
+})();
+</script>
+
+{% schema %}
+{
+  "name": "TC Scan Verification",
+  "tag": "section",
+  "class": "tc-scan-section",
+  "settings": [
+    { "type": "text", "id": "api_base",    "label": "API Base URL (must be https://)", "default": "https://sprout.trust.codes/api/" },
+    { "type": "text", "id": "brand_name",  "label": "Brand Name",        "default": "Sprout Organic" },
+    { "type": "text", "id": "verified_by", "label": "Verified By Label", "default": "Trust Codes" },
+    { "type": "color","id": "accent_color","label": "Accent Color",      "default": "#9bccc7" },
+    { "type": "header", "content": "Certificates of Analysis (per batch)" },
+    { "type": "paragraph", "content": "The COA button on the scan result is matched per product, per batch. PDF filename pattern: PREFIX-BATCH.pdf — e.g. IF-2362-1A 00069.pdf. Shopify converts spaces to _ on upload. If no matching PDF exists for the scanned batch, the button is hidden." },
+    { "type": "text",     "id": "coa_base_url",         "label": "Shopify Files CDN base URL", "info": "End with a trailing slash.", "default": "https://cdn.shopify.com/s/files/1/0505/7717/8797/files/" },
+    { "type": "textarea", "id": "coa_product_mappings", "label": "Product → prefix mappings",
+      "info": "One per line. Format: KEYWORD|PREFIX. The keyword is matched (case-insensitive) anywhere in the scanned product's name.",
+      "default": "infant|IF\ntoddler|TD" }
+  ],
+  "presets": [{ "name": "TC Scan Verification" }]
+}
+{% endschema %}

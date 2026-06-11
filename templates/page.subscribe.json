@@ -1,0 +1,267 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-page",
+      "disabled": true,
+      "settings": {}
+    },
+    "subscribe_banner_hero": {
+      "type": "subscribe-banner",
+      "settings": {
+        "padding_top": 120,
+        "padding_bottom": 120,
+        "heading": "Never Run Out.\nAlways Save.",
+        "subtext": "Set up a subscription and have Sprout delivered when you need it. Skip, pause or cancel anytime.",
+        "btn_label": "Start My Subscription",
+        "btn_link": "",
+        "heading_size_desktop": 46,
+        "heading_size_mobile": 34,
+        "heading_weight": "800",
+        "subtext_size_desktop": 16,
+        "subtext_size_mobile": 15,
+        "subtext_weight": "400",
+        "bg_color": "#d8b4e2",
+        "text_color": "#000000",
+        "btn_bg_color": "#9cd3c3",
+        "btn_text_color": "#ffffff"
+      }
+    },
+    "how_it_works_subscribe": {
+      "type": "how-it-works",
+      "blocks": {
+        "step_1_hiw": {
+          "type": "step",
+          "settings": {
+            "title": "Choose Your Products and Bundle Size",
+            "description": "Pick the Sprout formula and size that suits your little one, then choose how often you'd like it delivered."
+          }
+        },
+        "step_2_hiw": {
+          "type": "step",
+          "settings": {
+            "title": "We Deliver, Automatically",
+            "description": "Your order ships on your schedule — no reordering, no running out. We handle the rest so you don't have to think about it."
+          }
+        },
+        "step_3_hiw": {
+          "type": "step",
+          "settings": {
+            "title": "Full Flexibility, Always",
+            "description": "Skip a delivery, change your frequency, swap your product or cancel at any time. No lock-ins, no penalties."
+          }
+        }
+      },
+      "block_order": ["step_1_hiw", "step_2_hiw", "step_3_hiw"],
+      "settings": {
+        "padding_top": 80,
+        "padding_bottom": 80,
+        "container_max_width": 1200,
+        "main_heading": "How It Works",
+        "main_heading_size": 48,
+        "icon_width_desktop": 140,
+        "icon_height_desktop": 140,
+        "icon_width_mobile": 120,
+        "icon_height_mobile": 120,
+        "step_title_size": 22,
+        "step_title_weight": "700",
+        "bg_color": "#ffffff",
+        "text_color": "#000000"
+      }
+    },
+    "subscribe_benefits_main": {
+      "type": "subscribe-benefits",
+      "blocks": {
+        "benefit_1": {
+          "type": "benefit",
+          "settings": {
+            "title": "BUNDLE & SAVE",
+            "description": "Save up to 15% on every order when you subscribe. The more you bundle, the more you save."
+          }
+        },
+        "benefit_2": {
+          "type": "benefit",
+          "settings": {
+            "title": "NEVER RUN OUT",
+            "description": "Set your delivery frequency and we'll make sure Sprout arrives before you need it — no last-minute panic."
+          }
+        },
+        "benefit_3": {
+          "type": "benefit",
+          "settings": {
+            "title": "SKIP OR PAUSE ANYTIME",
+            "description": "Life happens. Skip a delivery, pause your subscription, or change your frequency — all from your account with no fuss."
+          }
+        },
+        "benefit_4": {
+          "type": "benefit",
+          "settings": {
+            "title": "CANCEL ANYTIME",
+            "description": "No lock-ins or cancellation fees. You're in control — cancel whenever you like, no questions asked."
+          }
+        }
+      },
+      "block_order": ["benefit_1", "benefit_2", "benefit_3", "benefit_4"],
+      "settings": {
+        "padding_top": 60,
+        "padding_bottom": 60,
+        "image_column_width": 50,
+        "image_min_height_desktop": 450,
+        "image_max_height_desktop": 610,
+        "image_min_height_mobile": 300,
+        "image_max_height_mobile": 450,
+        "image_border_radius": 0,
+        "main_heading": "Why Subscribe?",
+        "main_heading_size": 42,
+        "benefit_title_size": 16,
+        "benefit_title_weight": "700",
+        "section_bg_color": "#ffffff",
+        "card_bg_color": "#a9d1cc",
+        "text_color": "#000000"
+      }
+    },
+    "subscribe_faq_main": {
+      "type": "subscribe-faq",
+      "blocks": {
+        "tab_ingredients": {
+          "type": "tab_category",
+          "settings": { "tab_label": "Ingredients" }
+        },
+        "tab_shipping": {
+          "type": "tab_category",
+          "settings": { "tab_label": "Shipping" }
+        },
+        "tab_allergens": {
+          "type": "tab_category",
+          "settings": { "tab_label": "Allergens" }
+        },
+        "tab_subscription": {
+          "type": "tab_category",
+          "settings": { "tab_label": "Subscription" }
+        },
+        "tab_transition": {
+          "type": "tab_category",
+          "settings": { "tab_label": "Stage Transition" }
+        },
+        "sub_q1": {
+          "type": "faq_item",
+          "settings": {
+            "category": "Subscription",
+            "question": "How do I start a subscription?",
+            "answer": "Select your product, choose a delivery frequency, and click 'Subscribe & Save' on the product page. You'll need a Sprout account to manage your subscription going forward."
+          }
+        },
+        "sub_q2": {
+          "type": "faq_item",
+          "settings": {
+            "category": "Subscription",
+            "question": "Can I skip or pause my subscription?",
+            "answer": "Yes — log in to your account, navigate to your active subscriptions, and choose to skip a delivery or pause entirely. No penalties apply."
+          }
+        },
+        "sub_q3": {
+          "type": "faq_item",
+          "settings": {
+            "category": "Subscription",
+            "question": "How much do I save with a subscription?",
+            "answer": "Subscribers save a minimum of 10% off the standard retail price on every order, plus free standard shipping on qualifying orders."
+          }
+        },
+        "sub_q4": {
+          "type": "faq_item",
+          "settings": {
+            "category": "Subscription",
+            "question": "Can I change my delivery frequency?",
+            "answer": "You can update your delivery schedule at any time from your customer account — no need to cancel and start over."
+          }
+        },
+        "sub_q5": {
+          "type": "faq_item",
+          "settings": {
+            "category": "Subscription",
+            "question": "Is there a cancellation fee?",
+            "answer": "None at all. There are no lock-ins or fees. Cancel before your next order processes and your subscription ends, no questions asked."
+          }
+        },
+        "trans_q1": {
+          "type": "faq_item",
+          "settings": {
+            "category": "Stage Transition",
+            "question": "When should I transition from Infant Formula to Toddler Drink?",
+            "answer": "Sprout Toddler Drink is designed for little ones from 12 months. When your child is ready, Sprout Toddler Drink continues the same clean, plant-based nutrition profile they're used to."
+          }
+        },
+        "trans_q2": {
+          "type": "faq_item",
+          "settings": {
+            "category": "Stage Transition",
+            "question": "Can I mix Infant Formula and Toddler Drink during the transition?",
+            "answer": "We recommend transitioning gradually. You can introduce Toddler Drink alongside Infant Formula over a week or two, increasing the proportion of Toddler Drink as your little one adjusts to the taste and texture."
+          }
+        },
+        "trans_q3": {
+          "type": "faq_item",
+          "settings": {
+            "category": "Stage Transition",
+            "question": "Will the taste be different when we switch?",
+            "answer": "The Sprout Toddler Drink has a very similar flavour profile to our Infant Formula — both are lightly sweet and rice-based — which makes the transition easier for most little ones."
+          }
+        },
+        "trans_q4": {
+          "type": "faq_item",
+          "settings": {
+            "category": "Stage Transition",
+            "question": "What if my toddler refuses the Toddler Drink at first?",
+            "answer": "It's normal for some children to take a little time adjusting. Try warming it slightly, mixing a small amount into a familiar meal, or gradually blending it with the formula they're used to. Reach out to us at hello@sproutorganic.com.au for personalised support."
+          }
+        }
+      },
+      "block_order": ["tab_ingredients", "tab_shipping", "tab_allergens", "tab_subscription", "tab_transition", "sub_q1", "sub_q2", "sub_q3", "sub_q4", "sub_q5", "trans_q1", "trans_q2", "trans_q3", "trans_q4"],
+      "settings": {
+        "padding_top": 60,
+        "padding_bottom": 60,
+        "image_column_width": 45,
+        "image_max_height": 550,
+        "image_max_height_mobile": 350,
+        "main_heading": "Common Questions",
+        "main_heading_size": 44,
+        "faq_title_size": 16,
+        "section_bg_color": "#f0f8f6",
+        "active_bg_color": "#edf5f5",
+        "text_color": "#000000"
+      }
+    },
+    "subscribe_footer_cta": {
+      "type": "subscribe-footer-banner",
+      "settings": {
+        "padding_top": 50,
+        "padding_bottom": 0,
+        "image_max_width": 420,
+        "image_max_width_mobile": 280,
+        "image_max_height": 500,
+        "image_rotation": -5,
+        "image_overlap_top": -110,
+        "image_overlap_bottom": -70,
+        "heading": "Start Your Sprout\nSubscription",
+        "subtext": "Join thousands of parents who trust Sprout to arrive when they need it.",
+        "btn_label": "Start My Subscription",
+        "btn_link": "",
+        "heading_size_desktop": 42,
+        "heading_size_mobile": 32,
+        "top_bg_color": "#ffffff",
+        "strip_bg_color": "#d8b4e2",
+        "bottom_bg_color": "#9cd3c3",
+        "text_color": "#000000",
+        "btn_bg_color": "#9cd3c3",
+        "btn_text_color": "#ffffff"
+      }
+    }
+  },
+  "order": [
+    "subscribe_banner_hero",
+    "how_it_works_subscribe",
+    "subscribe_benefits_main",
+    "subscribe_faq_main",
+    "subscribe_footer_cta",
+    "main"
+  ]
+}

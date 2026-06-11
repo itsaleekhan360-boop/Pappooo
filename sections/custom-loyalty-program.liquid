@@ -1,0 +1,59 @@
+
+  <a href="{{section.settings.link.url}}" class="loyalty-section"
+    data-section-id="{{ section.id }}"
+  >
+    <div class="page-width">
+      <div>{%- render 'image-element',
+          img: section.settings.left_image,
+          widths: '180, 360, 540, 720',
+          classes: 'logo-bar__image',
+          sizeVariable: '160px',
+          fallback: '110px',
+        -%}</div>
+      <div class="text-section center">
+          <h2>Join our loyalty program</h2>
+          <p>Become a member and earn plant points and exclusive rewards every time you shop.</p>
+      </div>
+      <div>{%- render 'image-element',
+          img: section.settings.right_image,
+          widths: '180, 360, 540, 720',
+          classes: 'logo-bar__image',
+          sizeVariable: '250px',
+          fallback: '110px',
+        -%}</div>
+    
+    </div>
+  </a>
+  
+  {% schema %}
+  {
+    "name": "Custom Loyalty Program",
+    "class": "index-section--flush",
+    "settings": [
+        {
+            "type": "image_picker",
+            "id": "left_image",
+            "label": "Left Image"
+        },
+        {
+            "type": "image_picker",
+            "id": "right_image",
+            "label": "Right Image"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link"
+        }
+    ],
+    "presets": [
+      {
+        "name": "Custom Loyalty Program"
+      }
+    ],
+    "disabled_on": {
+      "groups": ["footer", "header", "custom.popups"]
+    }
+  }
+  {% endschema %}
+  

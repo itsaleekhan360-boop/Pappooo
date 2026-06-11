@@ -1,0 +1,389 @@
+{%- style -%}
+  /* Section Spacing & Width Variables */
+  .sprout-f-banner-{{ section.id }} {
+    position: relative;
+    width: 100%;
+    background-color: {{ section.settings.top_bg_color }};
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+
+  .sfb-center-strip {
+    background-color: {{ section.settings.strip_bg_color }};
+    padding: 40px 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+  }
+
+  .sfb-container {
+    max-width: {{ section.settings.container_max_width }}px;
+    width: 100%;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+  }
+
+  /* Left Side: Dynamic Image Settings from Schema */
+  .sfb-image-side {
+    width: 45%;
+    position: relative;
+    margin-top: {{ section.settings.image_overlap_top }}px; /* Control image upward overlap */
+    margin-bottom: {{ section.settings.image_overlap_bottom }}px; /* Control image downward overlap */
+    z-index: 5;
+  }
+
+  .sfb-image-wrapper {
+    width: 100%;
+    max-width: {{ section.settings.image_max_width }}px;
+    transform: rotate({{ section.settings.image_rotation }}deg); /* Customizer Dynamic Rotation */
+    filter: drop-shadow(0px 15px 25px rgba(0,0,0,0.15));
+    transition: transform 0.3s ease;
+  }
+
+  .sfb-image-wrapper img {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    max-height: {{ section.settings.image_max_height }}px; /* Customizer Dynamic Max Height */
+    object-fit: contain;
+    display: block;
+  }
+
+  /* Right Side: Content Box */
+  .sfb-content-side {
+    width: 50%;
+    text-align: left;
+    padding-left: 20px;
+    z-index: 3;
+  }
+
+  .sfb-heading {
+    font-family: "Core Rhino 85 Black", sans-serif;
+    font-size: {{ section.settings.heading_size_desktop }}px;
+    font-weight: 900;
+    line-height: 1.15;
+    color: {{ section.settings.text_color }};
+    margin: 0 0 15px 0;
+    letter-spacing: -0.5px;
+  }
+
+  .sfb-subtext {
+    font-size: 16px;
+    line-height: 1.4;
+    color: {{ section.settings.text_color }};
+    opacity: 0.85;
+    margin: 0 0 25px 0;
+  }
+
+  .sfb-btn {
+    display: inline-block;
+    background-color: {{ section.settings.btn_bg_color }};
+    color: {{ section.settings.btn_text_color }};
+    padding: 14px 35px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+  }
+
+  .sfb-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+  }
+
+  .sfb-bottom-strip {
+    background-color: {{ section.settings.bottom_bg_color }};
+    height: 60px;
+    width: 100%;
+  }
+
+  /* Mobile Responsive Framework */
+  @media screen and (max-width: 768px) {
+    .sprout-f-banner-{{ section.id }} {
+      padding-top: {{ section.settings.padding_top | times: 0.5 | round }}px;
+      padding-bottom: {{ section.settings.padding_bottom | times: 0.5 | round }}px;
+    }
+
+    .sfb-center-strip {
+      padding: 40px 20px;
+    }
+
+    .sfb-container {
+      flex-direction: column;
+      text-align: center;
+      gap: 40px;
+    }
+
+    .sfb-image-side {
+      width: 100%;
+      margin-top: 0 !important;
+      margin-bottom: 0 !important;
+      display: flex;
+      justify-content: center;
+    }
+
+    .sfb-image-wrapper {
+      max-width: {{ section.settings.image_max_width_mobile }}px;
+      transform: rotate(0deg); /* Straight layout on mobile devices for visual stability */
+    }
+
+    .sfb-image-wrapper img {
+      max-height: 300px;
+    }
+
+    .sfb-content-side {
+      width: 100%;
+      padding-left: 0;
+      text-align: center;
+    }
+
+    .sfb-heading {
+      font-size: {{ section.settings.heading_size_mobile }}px;
+    }
+
+    .sfb-bottom-strip {
+      display: none;
+    }
+  }
+{%- endstyle -%}
+
+<section class="sprout-f-banner-{{ section.id }}">
+  <div class="sfb-center-strip">
+    <div class="sfb-container">
+      
+      <div class="sfb-image-side">
+        <div class="sfb-image-wrapper">
+          {%- if section.settings.product_image != blank -%}
+            <img src="{{ section.settings.product_image | img_url: '600x600' }}" alt="{{ section.settings.heading | escape }}" loading="lazy">
+          {%- else -%}
+            {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
+          {%- endif -%}
+        </div>
+      </div>
+
+      <div class="sfb-content-side">
+        {%- if section.settings.heading != blank -%}
+          <h2 class="sfb-heading">{{ section.settings.heading | newline_to_br }}</h2>
+        {%- endif -%}
+        
+        {%- if section.settings.subtext != blank -%}
+          <div class="sfb-subtext">{{ section.settings.subtext }}</div>
+        {%- endif -%}
+
+        {%- if section.settings.btn_label != blank -%}
+          <a href="{{ section.settings.btn_link }}" class="sfb-btn">
+            {{ section.settings.btn_label }}
+          </a>
+        {%- endif -%}
+      </div>
+
+    </div>
+  </div>
+  <div class="sfb-bottom-strip"></div>
+</section>
+
+{% schema %}
+{
+  "name": "Sprout Custom Footer",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section Spacing & Structure"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 150,
+      "step": 5,
+      "unit": "px",
+      "label": "Padding Top",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 150,
+      "step": 5,
+      "unit": "px",
+      "label": "Padding Bottom",
+      "default": 0
+    },
+
+    {
+      "type": "header",
+      "content": "Media Settings"
+    },
+    {
+      "type": "image_picker",
+      "id": "product_image",
+      "label": "Product Pack Image"
+    },
+    {
+      "type": "range",
+      "id": "image_max_width",
+      "min": 200,
+      "max": 600,
+      "step": 10,
+      "unit": "px",
+      "label": "Image Max Width (Desktop)",
+      "default": 420
+    },
+    {
+      "type": "range",
+      "id": "image_max_width_mobile",
+      "min": 150,
+      "max": 400,
+      "step": 10,
+      "unit": "px",
+      "label": "Image Max Width (Mobile)",
+      "default": 280
+    },
+    {
+      "type": "range",
+      "id": "image_max_height",
+      "min": 250,
+      "max": 700,
+      "step": 10,
+      "unit": "px",
+      "label": "Image Max Height",
+      "default": 500
+    },
+    {
+      "type": "range",
+      "id": "image_rotation",
+      "min": -45,
+      "max": 45,
+      "step": 1,
+      "unit": "deg",
+      "label": "Image Rotation Angle",
+      "default": -5
+    },
+    {
+      "type": "range",
+      "id": "image_overlap_top",
+      "min": -200,
+      "max": 0,
+      "step": 5,
+      "unit": "px",
+      "label": "Image Overlap Top (Negative Margin)",
+      "default": -110
+    },
+    {
+      "type": "range",
+      "id": "image_overlap_bottom",
+      "min": -200,
+      "max": 0,
+      "step": 5,
+      "unit": "px",
+      "label": "Image Overlap Bottom (Negative Margin)",
+      "default": -70
+    },
+    {
+      "type": "header",
+      "content": "Content Settings"
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Start Your Sprout\nSubscription"
+    },
+    {
+      "type": "textarea",
+      "id": "subtext",
+      "label": "Subtext",
+      "default": "Join thousands of parents who trust Sprout to arrive when they need it."
+    },
+    {
+      "type": "text",
+      "id": "btn_label",
+      "label": "Button Label",
+      "default": "Start My Subscription"
+    },
+    {
+      "type": "url",
+      "id": "btn_link",
+      "label": "Button Link"
+    },
+    {
+      "type": "header",
+      "content": "Typography Settings"
+    },
+    {
+      "type": "range",
+      "id": "heading_size_desktop",
+      "min": 24,
+      "max": 64,
+      "step": 2,
+      "unit": "px",
+      "label": "Heading Size (Desktop)",
+      "default": 42
+    },
+    {
+      "type": "range",
+      "id": "heading_size_mobile",
+      "min": 18,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "label": "Heading Size (Mobile)",
+      "default": 32
+    },
+    {
+      "type": "header",
+      "content": "Section Layer Colors"
+    },
+    {
+      "type": "color",
+      "id": "top_bg_color",
+      "label": "Top Spacing Background Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "strip_bg_color",
+      "label": "Center Strip Background Color",
+      "default": "#d8b4e2"
+    },
+    {
+      "type": "color",
+      "id": "bottom_bg_color",
+      "label": "Bottom Strip Background Color",
+      "default": "#9cd3c3"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "btn_bg_color",
+      "label": "Button Background Color",
+      "default": "#9cd3c3"
+    },
+    {
+      "type": "color",
+      "id": "btn_text_color",
+      "label": "Button Text Color",
+      "default": "#ffffff"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Sprout Custom Footer Banner",
+      "category": "Promotional"
+    }
+  ]
+}
+{% endschema %}

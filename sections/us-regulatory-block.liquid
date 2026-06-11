@@ -1,0 +1,358 @@
+{% comment %}
+  Sprout Organic US Landing Page - Regulatory Comparison Block
+  File Path: Sections / us-regulatory-block.liquid
+{% endcomment %}
+
+<div class="us-regulatory-section-{{ section.id }} us-regulatory-wrapper">
+  <div class="us-regulatory-container">
+
+    <div class="us-regulatory-header">
+      {% if section.settings.heading != blank %}
+        <h2 class="us-regulatory-title">{{ section.settings.heading | escape }}</h2>
+      {% endif %}
+      {% if section.settings.subtext != blank %}
+        <p class="us-regulatory-subtext">{{ section.settings.subtext | escape }}</p>
+      {% endif %}
+    </div>
+
+    <div class="us-regulatory-columns">
+
+      <!-- FSANZ Card -->
+      <div class="us-regulatory-card us-regulatory-card--fsanz">
+        <div class="us-regulatory-card-header">
+          <span class="us-regulatory-flag">🇦🇺</span>
+          <div>
+            <div class="us-regulatory-card-label">FSANZ</div>
+            <div class="us-regulatory-card-subtitle">{{ section.settings.card1_subtitle | default: "Australia's gold-standard regulation" | escape }}</div>
+          </div>
+        </div>
+        <ul class="us-regulatory-list">
+          {% assign fsanz_points = section.settings.card1_bullets | newline_to_br | split: '<br />' %}
+          {% for point in fsanz_points %}
+            {% assign trimmed = point | strip %}
+            {% if trimmed != blank %}
+              <li class="us-regulatory-list-item">
+                <svg class="us-reg-check" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M20 6L9 17L4 12" stroke="{{ section.settings.accent_color }}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>{{ trimmed }}</span>
+              </li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+
+      <!-- FDA Card -->
+      <div class="us-regulatory-card us-regulatory-card--fda">
+        <div class="us-regulatory-card-header">
+          <span class="us-regulatory-flag">🇺🇸</span>
+          <div>
+            <div class="us-regulatory-card-label">FDA</div>
+            <div class="us-regulatory-card-subtitle">{{ section.settings.card2_subtitle | default: "United States regulatory framework" | escape }}</div>
+          </div>
+        </div>
+        <ul class="us-regulatory-list">
+          {% assign fda_points = section.settings.card2_bullets | newline_to_br | split: '<br />' %}
+          {% for point in fda_points %}
+            {% assign trimmed = point | strip %}
+            {% if trimmed != blank %}
+              <li class="us-regulatory-list-item">
+                <svg class="us-reg-check" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M20 6L9 17L4 12" stroke="{{ section.settings.accent_color }}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>{{ trimmed }}</span>
+              </li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap');
+
+  .us-regulatory-section-{{ section.id }} {
+    width: 100%;
+    box-sizing: border-box;
+    background-color: {{ section.settings.bg_color }};
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+
+  .us-regulatory-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 0 24px;
+    box-sizing: border-box;
+  }
+
+  .us-regulatory-header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+
+  .us-regulatory-title {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 38px;
+    font-weight: 700;
+    color: {{ section.settings.text_color }};
+    margin: 0 0 16px 0;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+  }
+
+  .us-regulatory-subtext {
+    font-family: 'Outfit', sans-serif;
+    font-size: 17px;
+    font-weight: 400;
+    line-height: 1.65;
+    color: {{ section.settings.text_color }};
+    opacity: 0.75;
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  .us-regulatory-columns {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+    width: 100%;
+  }
+
+  .us-regulatory-card {
+    border-radius: 18px;
+    padding: 36px 32px;
+    box-sizing: border-box;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .us-regulatory-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 30px rgba(28, 43, 36, 0.08);
+  }
+
+  .us-regulatory-card--fsanz {
+    background-color: {{ section.settings.card1_bg_color }};
+    border: 2px solid {{ section.settings.accent_color }};
+  }
+
+  .us-regulatory-card--fda {
+    background-color: {{ section.settings.card2_bg_color }};
+    border: 1px solid rgba(155, 204, 199, 0.25);
+  }
+
+  .us-regulatory-card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+
+  .us-regulatory-flag {
+    font-size: 32px;
+    line-height: 1;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .us-regulatory-card-label {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: {{ section.settings.text_color }};
+    line-height: 1.1;
+    margin-bottom: 4px;
+  }
+
+  .us-regulatory-card-subtitle {
+    font-family: 'Outfit', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: {{ section.settings.text_color }};
+    opacity: 0.65;
+    line-height: 1.4;
+  }
+
+  .us-regulatory-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .us-regulatory-list-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: {{ section.settings.text_color }};
+    opacity: 0.85;
+  }
+
+  .us-reg-check {
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  @media (max-width: 768px) {
+    .us-regulatory-section-{{ section.id }} {
+      padding-top: {{ section.settings.padding_top | times: 0.65 | round }}px;
+      padding-bottom: {{ section.settings.padding_bottom | times: 0.65 | round }}px;
+    }
+
+    .us-regulatory-columns {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    .us-regulatory-header {
+      margin-bottom: 32px;
+    }
+
+    .us-regulatory-title {
+      font-size: 26px;
+    }
+
+    .us-regulatory-subtext {
+      font-size: 15px;
+    }
+
+    .us-regulatory-card {
+      padding: 28px 22px;
+    }
+
+    .us-regulatory-card-label {
+      font-size: 22px;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Regulatory Block (US)",
+  "class": "shopify-section-us-regulatory",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section Content"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Section Heading",
+      "default": "Built to the World's Strictest Standards"
+    },
+    {
+      "type": "textarea",
+      "id": "subtext",
+      "label": "Section Subtext",
+      "default": "Australian infant formula regulation under FSANZ is among the most rigorous in the world. Sprout meets every requirement — and then some."
+    },
+    {
+      "type": "header",
+      "content": "FSANZ Card (Left)"
+    },
+    {
+      "type": "text",
+      "id": "card1_subtitle",
+      "label": "FSANZ Card Subtitle",
+      "default": "Australia's gold-standard regulation"
+    },
+    {
+      "type": "textarea",
+      "id": "card1_bullets",
+      "label": "FSANZ Bullet Points (one per line)",
+      "default": "Complete nutritional profile mandated\nMandatory independent batch testing\nMAIF code of conduct compliance\nCertified by Australian Infant Nutrition Council"
+    },
+    {
+      "type": "header",
+      "content": "FDA Card (Right)"
+    },
+    {
+      "type": "text",
+      "id": "card2_subtitle",
+      "label": "FDA Card Subtitle",
+      "default": "United States regulatory framework"
+    },
+    {
+      "type": "textarea",
+      "id": "card2_bullets",
+      "label": "FDA Bullet Points (one per line)",
+      "default": "FDA GRAS ingredient standards\nCurrent Good Manufacturing Practices (cGMP)\nNutritional labeling compliance\nRegular facility inspection"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Section Background Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "card1_bg_color",
+      "label": "FSANZ Card Background",
+      "default": "#f0f8f6"
+    },
+    {
+      "type": "color",
+      "id": "card2_bg_color",
+      "label": "FDA Card Background",
+      "default": "#f8fafb"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#1c2b24"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent / Check Color",
+      "default": "#9bccc7"
+    },
+    {
+      "type": "header",
+      "content": "Section Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Top",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Bottom",
+      "default": 80
+    }
+  ],
+  "presets": [
+    {
+      "name": "Regulatory Block (US)",
+      "category": "Trust & Safety"
+    }
+  ]
+}
+{% endschema %}

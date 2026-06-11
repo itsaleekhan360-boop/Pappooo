@@ -1,0 +1,87 @@
+{% comment %}
+  COA Button — single batch-specific Certificate of Analysis link.
+
+  Add ONE instance of this section per ingredient (Organic Rice Starch,
+  DHA, ARA, etc.). Each instance has just an "Ingredient code" — e.g. ORS
+  for Organic Rice Starch.
+
+  The product code (IF / TD) is auto-detected from the scan by the COA
+  Engine, so the same page works for both Infant Formula and Toddler
+  scans without duplication.
+
+  Requires the "COA Engine (TC Scan)" section to also be on the page.
+
+  The button is hidden until:
+    1. The TC scan returns a batch number AND a recognised product, AND
+    2. The PDF {Files CDN base}{ingredient}-{product}-{batch}.pdf is
+       confirmed to exist in Shopify Files (HEAD 200).
+
+  If either condition fails, the button stays hidden.
+{% endcomment %}
+
+<div class="coa-btn-wrap" style="text-align: {{ section.settings.alignment }};">
+  <a class="coa-btn"
+     data-coa-prefix="{{ section.settings.prefix_code | escape }}"
+     {% if section.settings.fallback_url != blank %}data-coa-fallback="{{ section.settings.fallback_url | escape }}"{% endif %}
+     href="#"
+     style="--coa-bg: {{ section.settings.bg_color }}; --coa-fg: {{ section.settings.text_color }};">
+    {{ section.settings.button_text | escape }}
+  </a>
+</div>
+
+<style>
+  .coa-btn-wrap { margin: {{ section.settings.margin_top }}px 0 {{ section.settings.margin_bottom }}px; }
+  .coa-btn {
+    display: inline-block;
+    background: var(--coa-bg, #9bccc7);
+    color: var(--coa-fg, #ffffff);
+    border: 0;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    padding: 12px 32px;
+    border-radius: 30px;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .coa-btn:hover,
+  .coa-btn:focus {
+    background: var(--coa-bg, #9bccc7);
+    color: var(--coa-fg, #ffffff);
+    text-decoration: none;
+    outline: 0;
+    opacity: 0.92;
+  }
+</style>
+
+{% schema %}
+{
+  "name": "COA Button",
+  "tag": "section",
+  "class": "coa-button-section",
+  "settings": [
+    { "type": "text",   "id": "prefix_code",  "label": "Ingredient code",
+      "info": "Just the ingredient code, e.g. ORS, OOB, DHA, ARA, VTM, ORP.",
+      "default": "ORS" },
+    { "type": "text",   "id": "button_text",  "label": "Button text", "default": "View COA" },
+    { "type": "url",    "id": "fallback_url", "label": "Fallback COA URL (optional)",
+      "info": "Shown when no scan code is in the URL (e.g. someone visits the page directly). Leave empty to hide the button in that case." },
+    { "type": "header", "content": "Style" },
+    { "type": "select", "id": "alignment",    "label": "Alignment",
+      "options": [
+        { "value": "left",   "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right",  "label": "Right" }
+      ],
+      "default": "center" },
+    { "type": "color",  "id": "bg_color",     "label": "Background", "default": "#9bccc7" },
+    { "type": "color",  "id": "text_color",   "label": "Text color", "default": "#ffffff" },
+    { "type": "range",  "id": "margin_top",   "label": "Margin top",
+      "min": 0, "max": 80, "step": 4, "unit": "px", "default": 16 },
+    { "type": "range",  "id": "margin_bottom","label": "Margin bottom",
+      "min": 0, "max": 80, "step": 4, "unit": "px", "default": 16 }
+  ],
+  "presets": [{ "name": "COA Button" }]
+}
+{% endschema %}

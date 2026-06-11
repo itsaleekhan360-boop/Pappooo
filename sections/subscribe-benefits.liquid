@@ -1,0 +1,160 @@
+{%- style -%}
+  .img-benefits-{{ section.id }} {
+    background-color: {{ section.settings.section_bg_color }};
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+
+  .ib-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0;
+  }
+
+  .ib-image-col {
+    width: {{ section.settings.image_column_width }}%;
+  }
+
+  .ib-content-col {
+    width: {{ 100 | minus: section.settings.image_column_width }}%;
+  }
+
+  .ib-image-wrapper {
+    min-height: {{ section.settings.image_min_height_desktop }}px;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .ib-image-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    max-height: {{ section.settings.image_max_height_desktop }}px;
+    border-radius: {{ section.settings.image_border_radius }}px;
+  }
+
+  .ib-content-card {
+    background-color: {{ section.settings.card_bg_color }};
+    padding: 50px 40px;
+    height: 100%;
+    box-sizing: border-box;
+    border-radius: {{ section.settings.image_border_radius }}px;
+  }
+
+  .ib-main-heading {
+    font-family: "Core Rhino 85 Black", sans-serif;
+    font-size: {{ section.settings.main_heading_size }}px;
+    font-weight: 900;
+    color: {{ section.settings.text_color }};
+    margin: 0 0 35px 0;
+    letter-spacing: -0.5px;
+  }
+
+  .ib-benefit-item { margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid rgba(0,0,0,0.1); }
+  .ib-benefit-item:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+
+  .ib-benefit-title-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .ib-benefit-icon { width: 25px; }
+  .ib-benefit-icon img, .ib-benefit-icon svg { width: 16px; height: 16px; display: block; }
+  .ib-benefit-title { font-size: {{ section.settings.benefit_title_size }}px; font-weight: {{ section.settings.benefit_title_weight }}; text-transform: uppercase; color: {{ section.settings.text_color }}; letter-spacing: 0.5px; }
+  .ib-benefit-desc { font-size: 14px; line-height: 1.5; color: {{ section.settings.text_color }}; opacity: 0.85; margin: 0; padding-left: 35px; }
+
+  @media screen and (max-width: 768px) {
+    .img-benefits-{{ section.id }} {
+      padding-top: {{ section.settings.padding_top | times: 0.6 | round }}px;
+      padding-bottom: {{ section.settings.padding_bottom | times: 0.6 | round }}px;
+    }
+    .ib-image-col, .ib-content-col { width: 100% !important; }
+    .ib-image-wrapper { min-height: {{ section.settings.image_min_height_mobile }}px; }
+    .ib-image-wrapper img { max-height: {{ section.settings.image_max_height_mobile }}px; }
+    .ib-content-card { padding: 35px 20px; }
+  }
+{%- endstyle -%}
+
+<section class="img-benefits-{{ section.id }}">
+  <div class="page-width">
+    <div class="ib-wrapper">
+      
+      <div class="ib-image-col">
+        <div class="ib-image-wrapper">
+          {%- if section.settings.side_image != blank -%}
+            <img src="{{ section.settings.side_image | img_url: '800x800' }}" alt="{{ section.settings.main_heading | escape }}" loading="lazy">
+          {%- else -%}
+            {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+          {%- endif -%}
+        </div>
+      </div>
+
+      <div class="ib-content-col">
+        <div class="ib-content-card">
+          {%- if section.settings.main_heading != blank -%}
+            <h2 class="ib-main-heading">{{ section.settings.main_heading }}</h2>
+          {%- endif -%}
+
+          <div class="ib-benefits-list">
+            {%- for block in section.blocks -%}
+              <div class="ib-benefit-item" {{ block.shopify_attributes }}>
+                <div class="ib-benefit-title-row">
+                  <div class="ib-benefit-icon">
+                    {%- if block.settings.benefit_icon != blank -%}
+                      <img src="{{ block.settings.benefit_icon | img_url: '50x50' }}" alt="" loading="lazy">
+                    {%- else -%}
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                    {%- endif -%}
+                  </div>
+                  <div class="ib-benefit-title">{{ block.settings.title }}</div>
+                </div>
+                {%- if block.settings.description != blank -%}
+                  <p class="ib-benefit-desc">{{ block.settings.description }}</p>
+                {%- endif -%}
+              </div>
+            {%- endfor -%}
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Image with Benefits",
+  "settings": [
+    { "type": "header", "content": "Section Layout Spacing" },
+    { "type": "range", "id": "padding_top", "min": 0, "max": 150, "step": 5, "unit": "px", "label": "Padding Top", "default": 60 },
+    { "type": "range", "id": "padding_bottom", "min": 0, "max": 150, "step": 5, "unit": "px", "label": "Padding Bottom", "default": 60 },
+    { "type": "header", "content": "Media Settings" },
+    { "type": "image_picker", "id": "side_image", "label": "Side Image" },
+    { "type": "range", "id": "image_column_width", "min": 30, "max": 70, "step": 5, "unit": "%", "label": "Image Width %", "default": 50 },
+    { "type": "range", "id": "image_min_height_desktop", "min": 300, "max": 600, "step": 10, "unit": "px", "label": "Min Height (Desk)", "default": 450 },
+    { "type": "range", "id": "image_max_height_desktop", "min": 400, "max": 900, "step": 10, "unit": "px", "label": "Max Height (Desk)", "default": 610 },
+    { "type": "range", "id": "image_min_height_mobile", "min": 200, "max": 400, "step": 10, "unit": "px", "label": "Min Height (Mob)", "default": 300 },
+    { "type": "range", "id": "image_max_height_mobile", "min": 300, "max": 600, "step": 10, "unit": "px", "label": "Max Height (Mob)", "default": 450 },
+    { "type": "range", "id": "image_border_radius", "min": 0, "max": 40, "step": 2, "unit": "px", "label": "Border Radius", "default": 0 },
+    { "type": "header", "content": "Text Management" },
+    { "type": "text", "id": "main_heading", "label": "Main Heading", "default": "Benefits" },
+    { "type": "range", "id": "main_heading_size", "min": 28, "max": 64, "step": 2, "unit": "px", "label": "Heading Size", "default": 42 },
+    { "type": "range", "id": "benefit_title_size", "min": 14, "max": 24, "step": 1, "unit": "px", "label": "Benefit Title Size", "default": 16 },
+    { "type": "select", "id": "benefit_title_weight", "label": "Benefit Title Weight", "options": [ { "value": "500", "label": "Medium" }, { "value": "600", "label": "Semi-Bold" }, { "value": "700", "label": "Bold" }, { "value": "800", "label": "Extra Bold" } ], "default": "700" },
+    { "type": "header", "content": "Color Palette" },
+    { "type": "color", "id": "section_bg_color", "label": "Section BG", "default": "#ffffff" },
+    { "type": "color", "id": "card_bg_color", "label": "Card BG", "default": "#a9d1cc" },
+    { "type": "color", "id": "text_color", "label": "Text/Icon Color", "default": "#000000" }
+  ],
+  "blocks": [
+    {
+      "type": "benefit",
+      "name": "Benefit Item",
+      "settings": [
+        { "type": "image_picker", "id": "benefit_icon", "label": "Custom Icon" },
+        { "type": "text", "id": "title", "label": "Title", "default": "BUNDLE & SAVE" },
+        { "type": "textarea", "id": "description", "label": "Description", "default": "Save up to 15% on orders." }
+      ]
+    }
+  ],
+  "presets": [ { "name": "Image with Benefits" } ]
+}
+{% endschema %}

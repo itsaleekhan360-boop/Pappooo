@@ -1,0 +1,229 @@
+{% comment %}
+  Sprout Organic US Landing Page - Final CTA Section
+  File Path: Sections / us-final-cta.liquid
+{% endcomment %}
+
+<div class="us-final-cta-section-{{ section.id }} us-final-cta-wrapper">
+  <div class="us-final-cta-container">
+
+    {% if section.settings.heading != blank %}
+      <h2 class="us-final-cta-title">{{ section.settings.heading | escape }}</h2>
+    {% endif %}
+
+    <div class="us-final-cta-stars">
+      {% for i in (1..5) %}
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="{{ section.settings.btn_bg_color }}" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.787 1.4 8.168L12 18.896l-7.334 3.857 1.4-8.168L.132 9.21l8.2-1.192L12 .587z"/>
+        </svg>
+      {% endfor %}
+    </div>
+
+    {% if section.settings.subheading != blank %}
+      <p class="us-final-cta-subheading">{{ section.settings.subheading | escape }}</p>
+    {% endif %}
+
+    {% if section.settings.button_label != blank %}
+      <a href="{{ section.settings.button_link | default: '#' }}" class="us-final-cta-btn">
+        {{ section.settings.button_label | escape }}
+      </a>
+    {% endif %}
+
+  </div>
+</div>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap');
+
+  .us-final-cta-section-{{ section.id }} {
+    width: 100%;
+    box-sizing: border-box;
+    background-color: {{ section.settings.bg_color }};
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+
+  .us-final-cta-container {
+    max-width: 720px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 0 24px;
+    box-sizing: border-box;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .us-final-cta-title {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 44px;
+    font-weight: 700;
+    color: {{ section.settings.text_color }};
+    margin: 0;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+  }
+
+  .us-final-cta-stars {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+  }
+
+  .us-final-cta-subheading {
+    font-family: 'Outfit', sans-serif;
+    font-size: 17px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: {{ section.settings.text_color }};
+    opacity: 0.85;
+    margin: 0;
+  }
+
+  .us-final-cta-btn {
+    display: inline-block;
+    background-color: {{ section.settings.btn_bg_color }};
+    color: {{ section.settings.btn_text_color }} !important;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 17px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    padding: 16px 52px;
+    border-radius: 50px;
+    text-decoration: none;
+    transition: all 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.12);
+    border: 2px solid transparent;
+    margin-top: 8px;
+  }
+
+  .us-final-cta-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+    opacity: 0.92;
+  }
+
+  @media (max-width: 768px) {
+    .us-final-cta-section-{{ section.id }} {
+      padding-top: {{ section.settings.padding_top | times: 0.65 | round }}px;
+      padding-bottom: {{ section.settings.padding_bottom | times: 0.65 | round }}px;
+    }
+
+    .us-final-cta-title {
+      font-size: 30px;
+    }
+
+    .us-final-cta-subheading {
+      font-size: 15px;
+    }
+
+    .us-final-cta-btn {
+      padding: 14px 40px;
+      font-size: 15px;
+      width: 100%;
+      max-width: 300px;
+      box-sizing: border-box;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Final CTA (US)",
+  "class": "shopify-section-us-final-cta",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section Content"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Try Sprout for Your Family"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "4.7 stars from 300+ reviews"
+    },
+    {
+      "type": "header",
+      "content": "Call-to-Action Button"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button Label",
+      "default": "Shop Sprout"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button Destination URL"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Section Background Color",
+      "default": "#9bccc7"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "btn_bg_color",
+      "label": "Button Background Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "btn_text_color",
+      "label": "Button Text Color",
+      "default": "#9bccc7"
+    },
+    {
+      "type": "header",
+      "content": "Section Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Top",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Bottom",
+      "default": 80
+    }
+  ],
+  "presets": [
+    {
+      "name": "Final CTA (US)",
+      "category": "Call to Action"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,425 @@
+{% comment %}
+  Sprout Organic US Landing Page - Hero Banner Custom Section
+  File Path: Sections / us-hero-banner.liquid
+{% endcomment %}
+
+<div class="us-hero-section-{{ section.id }} us-hero-wrapper">
+  <div class="us-hero-container">
+    <div class="us-hero-content-box">
+      
+      <!-- Sub-header Badge Tag -->
+      {% if section.settings.sub_tag != blank %}
+        <span class="us-hero-subtag">{{ section.settings.sub_tag | escape }}</span>
+      {% endif %}
+
+      <!-- Main Heading Title -->
+      {% if section.settings.main_title != blank %}
+        <h1 class="us-hero-title">{{ section.settings.main_title | newline_to_br }}</h1>
+      {% endif %}
+
+      <!-- Paragraph Description -->
+      {% if section.settings.desc_text != blank %}
+        <p class="us-hero-desc">{{ section.settings.desc_text | escape }}</p>
+      {% endif %}
+
+      <!-- Rating and Trust Row -->
+      {% if section.settings.show_rating %}
+        <div class="us-hero-rating-row">
+          <div class="us-hero-stars">
+            {% for i in (1..section.settings.star_count) %}
+              <svg class="us-star-icon" viewBox="0 0 24 24" width="20" height="20" fill="#ffb703">
+                <path d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.787 1.4 8.168L12 18.896l-7.334 3.857 1.4-8.168L.132 9.21l8.2-1.192L12 .587z"/>
+              </svg>
+            {% endfor %}
+          </div>
+          {% if section.settings.reviews_label != blank %}
+            <span class="us-hero-rating-text">{{ section.settings.reviews_label | escape }}</span>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      <!-- Call To Action Button -->
+      {% if section.settings.button_text != blank %}
+        <a href="{{ section.settings.button_link | default: '#' }}" class="us-hero-cta">
+          {{ section.settings.button_text | escape }}
+        </a>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Dynamic fonts registration if not globally loaded */
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap');
+
+  .us-hero-section-{{ section.id }} {
+    position: relative;
+    width: 100%;
+    min-height: {{ section.settings.desktop_height }}px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    box-sizing: border-box;
+    overflow: hidden;
+    padding: 60px 24px;
+    background-size: cover;
+    background-position: center {{ section.settings.bg_position }};
+    background-repeat: no-repeat;
+    
+    /* Configurable Desktop Background Image with fallback */
+    {% if section.settings.bg_image != blank %}
+      background-image: linear-gradient(
+        rgba(0, 0, 0, {{ section.settings.overlay_opacity }}), 
+        rgba(0, 0, 0, {{ section.settings.overlay_opacity }})
+      ), url('{{ section.settings.bg_image | img_url: "2000x" }}');
+    {% else %}
+      /* Aesthetic placeholder if client hasn't uploaded image yet */
+      background-image: linear-gradient(
+        rgba(0, 0, 0, 0.55), 
+        rgba(0, 0, 0, 0.55)
+      ), url('https://placehold.co/1920x1080/4a5d53/ffffff?text=Upload+US+Hero+Banner+In+Customizer');
+    {% endif %}
+  }
+
+  .us-hero-container {
+    max-width: 900px;
+    width: 100%;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+  }
+
+  .us-hero-content-box {
+    animation: usFadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  /* Subtitle Badge Styling */
+  .us-hero-subtag {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: #ffffff;
+    display: inline-block;
+    border-bottom: 2px solid {{ section.settings.brand_color }};
+    padding-bottom: 6px;
+    margin-bottom: 22px;
+  }
+
+  /* Main Dynamic Title */
+  .us-hero-title {
+    font-family: 'Fredoka', sans-serif;
+    font-size: {{ section.settings.title_size_desktop }}px;
+    font-weight: 700;
+    line-height: 1.15;
+    color: #ffffff;
+    margin: 0 0 20px 0;
+    letter-spacing: -0.02em;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  }
+
+  /* Description text */
+  .us-hero-desc {
+    font-family: 'Outfit', sans-serif;
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 1.6;
+    color: #f3f7f5;
+    max-width: 720px;
+    margin: 0 auto 30px auto;
+    text-shadow: 0 1px 5px rgba(0,0,0,0.25);
+  }
+
+  /* Review Rating Elements */
+  .us-hero-rating-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 35px;
+    flex-wrap: wrap;
+  }
+
+  .us-hero-stars {
+    display: flex;
+    gap: 3px;
+    align-items: center;
+  }
+
+  .us-star-icon {
+    width: 18px;
+    height: 18px;
+    display: inline-block;
+  }
+
+  .us-hero-rating-text {
+    font-family: 'Outfit', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+  }
+
+  /* High End CTA Button Setup */
+  .us-hero-cta {
+    display: inline-block;
+    background-color: {{ section.settings.brand_color }};
+    color: #ffffff !important;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    padding: 10px 40px;
+    border-radius: 50px;
+    text-decoration: none;
+    transition: all 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    border: 2px solid transparent;
+  }
+
+  .us-hero-cta:hover {
+    background-color: {{ section.settings.brand_color_hover }};
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+  }
+
+  /* Mobile Responsive Fixes (Prevents issues visible in image_c694f6.jpg) */
+  @media (max-width: 767px) {
+    .us-hero-section-{{ section.id }} {
+      min-height: {{ section.settings.mobile_height }}px;
+      padding: 50px 16px;
+      
+      /* Option to use custom portrait background on mobile screens */
+      {% if section.settings.bg_image_mobile != blank %}
+        background-image: linear-gradient(
+          rgba(0, 0, 0, {{ section.settings.overlay_opacity }}), 
+          rgba(0, 0, 0, {{ section.settings.overlay_opacity }})
+        ), url('{{ section.settings.bg_image_mobile | img_url: "800x" }}');
+      {% endif %}
+    }
+
+    .us-hero-title {
+      font-size: {{ section.settings.title_size_mobile }}px;
+      line-height: 1.2;
+      margin-bottom: 15px;
+    }
+
+    .us-hero-desc {
+      font-size: 15px;
+      line-height: 1.5;
+      margin-bottom: 24px;
+      padding: 0 8px;
+    }
+
+    .us-hero-subtag {
+      font-size: 12px;
+      letter-spacing: 2px;
+      margin-bottom: 16px;
+    }
+
+    .us-hero-rating-row {
+      margin-bottom: 28px;
+    }
+
+    .us-hero-cta {
+      padding: 14px 38px;
+      font-size: 15px;
+      width: 100%;
+      max-width: 290px;
+      box-sizing: border-box;
+    }
+  }
+
+  /* Simple entry micro-animation */
+  @keyframes usFadeUp {
+    0% {
+      opacity: 0;
+      transform: translateY(25px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "US Landing Hero",
+  "class": "shopify-section-us-hero",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Desktop Settings"
+    },
+    {
+      "type": "image_picker",
+      "id": "bg_image",
+      "label": "Desktop Background Banner"
+    },
+    {
+      "type": "range",
+      "id": "desktop_height",
+      "min": 450,
+      "max": 800,
+      "step": 50,
+      "unit": "px",
+      "label": "Section Desktop Height",
+      "default": 600
+    },
+    {
+      "type": "range",
+      "id": "title_size_desktop",
+      "min": 32,
+      "max": 72,
+      "step": 2,
+      "unit": "px",
+      "label": "Title Font Size Desktop",
+      "default": 52
+    },
+    {
+      "type": "select",
+      "id": "bg_position",
+      "label": "Desktop Image Position",
+      "options": [
+        {"value": "top", "label": "Top"},
+        {"value": "center", "label": "Center"},
+        {"value": "bottom", "label": "Bottom"}
+      ],
+      "default": "center"
+    },
+    {
+      "type": "header",
+      "content": "Mobile Settings"
+    },
+    {
+      "type": "image_picker",
+      "id": "bg_image_mobile",
+      "label": "Mobile Portrait Background (Recommended)",
+      "info": "Upload a vertical crop portrait image so the baby is framed perfectly on mobile phones."
+    },
+    {
+      "type": "range",
+      "id": "mobile_height",
+      "min": 400,
+      "max": 700,
+      "step": 50,
+      "unit": "px",
+      "label": "Section Mobile Height",
+      "default": 550
+    },
+    {
+      "type": "range",
+      "id": "title_size_mobile",
+      "min": 24,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "label": "Title Font Size Mobile",
+      "default": 34
+    },
+    {
+      "type": "header",
+      "content": "Hero Scrim & Branding Colors"
+    },
+    {
+      "type": "select",
+      "id": "overlay_opacity",
+      "label": "Background Dark Overlay Scrim",
+      "options": [
+        {"value": "0.2", "label": "Extra Light (0.2)"},
+        {"value": "0.4", "label": "Light (0.4)"},
+        {"value": "0.55", "label": "Medium / Normal (0.55)"},
+        {"value": "0.7", "label": "Dark (0.7)"},
+        {"value": "0.85", "label": "Extra Dark (0.85)"}
+      ],
+      "default": "0.55",
+      "info": "Darkens background image to make white text clean and readable."
+    },
+    {
+      "type": "color",
+      "id": "brand_color",
+      "label": "Primary Accent / Button Color",
+      "default": "#79ad9c"
+    },
+    {
+      "type": "color",
+      "id": "brand_color_hover",
+      "label": "Button Hover Color",
+      "default": "#5d9180"
+    },
+    {
+      "type": "header",
+      "content": "Banner Content Text"
+    },
+    {
+      "type": "text",
+      "id": "sub_tag",
+      "label": "Sub Heading Badge",
+      "default": "NOW AVAILABLE IN THE UNITED STATES"
+    },
+    {
+      "type": "textarea",
+      "id": "main_title",
+      "label": "Main Heading Title",
+      "default": "Australian Organic Nutrition,\nNow In The US"
+    },
+    {
+      "type": "textarea",
+      "id": "desc_text",
+      "label": "Paragraph Description",
+      "default": "Sprout makes the world's first certified organic, plant-based infant nutrition — trusted by 49,000+ parents and now available across the United States."
+    },
+    {
+      "type": "header",
+      "content": "Social Proof (Stars & Reviews)"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_rating",
+      "label": "Show Rating Row",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "star_count",
+      "min": 1,
+      "max": 5,
+      "step": 1,
+      "label": "Stars Rating Score",
+      "default": 5
+    },
+    {
+      "type": "text",
+      "id": "reviews_label",
+      "label": "Reviews Plain Text",
+      "default": "4.7 stars · 300+ verified reviews"
+    },
+    {
+      "type": "header",
+      "content": "Call-to-Action Link"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button Label",
+      "default": "SHOP SPROUT"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button Destination URL"
+    }
+  ],
+  "presets": [
+    {
+      "name": "US Landing Hero",
+      "category": "Hero Elements"
+    }
+  ]
+}
+{% endschema %}

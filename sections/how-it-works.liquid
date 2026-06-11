@@ -1,0 +1,200 @@
+{%- style -%}
+  .how-it-works-{{ section.id }} {
+    background-color: {{ section.settings.bg_color }};
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+
+  /* Page-width container styling */
+  .how-it-works-{{ section.id }} .page-width {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .hiw-main-heading {
+    font-family: "Core Rhino 85 Black", sans-serif;
+    font-size: {{ section.settings.main_heading_size }}px;
+    font-weight: 900;
+    color: {{ section.settings.text_color }};
+    margin: 0 0 60px 0;
+    letter-spacing: -0.5px;
+    text-align: center;
+  }
+
+  .hiw-steps-container {
+    max-width: {{ section.settings.container_max_width }}px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    position: relative;
+    gap: 30px;
+  }
+
+  .hiw-line-bg {
+    position: absolute;
+    top: 45px;
+    left: 13%;
+    width: 70%;
+    height: 87px;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .hiw-line-bg img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .hiw-step-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+    max-width: 350px;
+  }
+
+  .hiw-icon-wrapper {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+  }
+
+  .hiw-icon-inner {
+    width: {{ section.settings.icon_width_desktop }}px;
+    height: {{ section.settings.icon_height_desktop }}px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .hiw-icon-inner img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+
+  .hiw-step-number {
+    font-size: 13px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: {{ section.settings.text_color }};
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+  }
+
+  .hiw-step-title {
+    font-size: {{ section.settings.step_title_size }}px;
+    font-weight: {{ section.settings.step_title_weight }};
+    color: {{ section.settings.text_color }};
+    margin: 0 0 12px 0;
+    line-height: 1.3;
+  }
+
+  .hiw-step-desc {
+    font-size: 15px;
+    line-height: 1.5;
+    color: {{ section.settings.text_color }};
+    opacity: 0.8;
+    margin: 0;
+  }
+
+  @media screen and (max-width: 768px) {
+    .how-it-works-{{ section.id }} {
+      padding-top: {{ section.settings.padding_top | times: 0.6 | round }}px;
+      padding-bottom: {{ section.settings.padding_bottom | times: 0.6 | round }}px;
+    }
+    .how-it-works-{{ section.id }} .page-width {
+      padding-left: 15px;
+      padding-right: 15px;
+    }
+    .hiw-main-heading { font-size: 32px; margin-bottom: 40px; }
+    .hiw-steps-container { flex-direction: column; align-items: center; gap: 50px; }
+    .hiw-line-bg { display: none; }
+    .hiw-step-item { max-width: 100%; }
+    .hiw-icon-inner {
+      width: {{ section.settings.icon_width_mobile }}px;
+      height: {{ section.settings.icon_height_mobile }}px;
+    }
+  }
+{%- endstyle -%}
+
+<section class="how-it-works-{{ section.id }}">
+  <div class="page-width">
+    {%- if section.settings.main_heading != blank -%}
+      <h2 class="hiw-main-heading">{{ section.settings.main_heading }}</h2>
+    {%- endif -%}
+
+    <div class="hiw-steps-container">
+      {%- if section.settings.line_image != blank -%}
+        <div class="hiw-line-bg">
+          <img src="{{ section.settings.line_image | img_url: '1200x' }}" alt="connecting line" loading="lazy">
+        </div>
+      {%- endif -%}
+
+      {%- for block in section.blocks -%}
+        <div class="hiw-step-item" {{ block.shopify_attributes }}>
+          <div class="hiw-icon-wrapper">
+            <div class="hiw-icon-inner">
+              {%- if block.settings.step_icon != blank -%}
+                <img src="{{ block.settings.step_icon | img_url: '300x300' }}" alt="{{ block.settings.title | escape }}" loading="lazy">
+              {%- else -%}
+                {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+              {%- endif -%}
+            </div>
+          </div>
+          <span class="hiw-step-number">Step {{ forloop.index }}</span>
+          <h3 class="hiw-step-title">{{ block.settings.title }}</h3>
+          <p class="hiw-step-desc">{{ block.settings.description }}</p>
+        </div>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "How It Works",
+  "max_blocks": 4,
+  "settings": [
+    { "type": "header", "content": "Section Layout Spacing" },
+    { "type": "range", "id": "padding_top", "min": 0, "max": 150, "step": 5, "unit": "px", "label": "Padding Top", "default": 80 },
+    { "type": "range", "id": "padding_bottom", "min": 0, "max": 150, "step": 5, "unit": "px", "label": "Padding Bottom", "default": 80 },
+    { "type": "range", "id": "container_max_width", "min": 1000, "max": 1600, "step": 50, "unit": "px", "label": "Container Maximum Width", "default": 1200 },
+    { "type": "header", "content": "Heading Settings" },
+    { "type": "text", "id": "main_heading", "label": "Main Section Heading", "default": "How It Works" },
+    { "type": "range", "id": "main_heading_size", "min": 28, "max": 64, "step": 2, "unit": "px", "label": "Main Heading Font Size", "default": 48 },
+    { "type": "header", "content": "Connecting Line" },
+    { "type": "image_picker", "id": "line_image", "label": "Connecting Line Image (Desktop)" },
+    { "type": "header", "content": "Steps Icon Dimensions" },
+    { "type": "range", "id": "icon_width_desktop", "min": 40, "max": 250, "step": 5, "unit": "px", "label": "Icon Width (Desktop)", "default": 140 },
+    { "type": "range", "id": "icon_height_desktop", "min": 40, "max": 250, "step": 5, "unit": "px", "label": "Icon Height (Desktop)", "default": 140 },
+    { "type": "range", "id": "icon_width_mobile", "min": 40, "max": 200, "step": 5, "unit": "px", "label": "Icon Width (Mobile)", "default": 120 },
+    { "type": "range", "id": "icon_height_mobile", "min": 40, "max": 200, "step": 5, "unit": "px", "label": "Icon Height (Mobile)", "default": 120 },
+    { "type": "header", "content": "Steps Typography" },
+    { "type": "range", "id": "step_title_size", "min": 16, "max": 32, "step": 1, "unit": "px", "label": "Step Title Size", "default": 22 },
+    { "type": "select", "id": "step_title_weight", "label": "Step Title Weight", "options": [ { "value": "400", "label": "Normal (400)" }, { "value": "600", "label": "Semi-Bold (600)" }, { "value": "700", "label": "Bold (700)" }, { "value": "800", "label": "Extra Bold (800)" } ], "default": "700" },
+    { "type": "header", "content": "Color Management" },
+    { "type": "color", "id": "bg_color", "label": "Background Color", "default": "#ffffff" },
+    { "type": "color", "id": "text_color", "label": "Global Text Color", "default": "#000000" }
+  ],
+  "blocks": [
+    {
+      "type": "step",
+      "name": "Step Item",
+      "settings": [
+        { "type": "image_picker", "id": "step_icon", "label": "Step Icon / Image" },
+        { "type": "text", "id": "title", "label": "Step Title", "default": "Step Title" },
+        { "type": "textarea", "id": "description", "label": "Step Description", "default": "Add your description here." }
+      ]
+    }
+  ],
+  "presets": [ { "name": "How It Works" } ]
+}
+{% endschema %}
